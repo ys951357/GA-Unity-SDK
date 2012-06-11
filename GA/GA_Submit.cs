@@ -101,18 +101,31 @@ public static class GA_Submit
 			{
 				/* If we already added another item of this type then remove the UserID, SessionID, and Build values if necessary.
 				 * These values only need to be present in each message once, since they will be the same for all items */
-				
-				// TODO: below not supported yet in API - activate once redundant data can be trimmed
+
+				/* TODO: below not supported yet in API (exclude information)
+				 * activate once redundant data can be trimmed */
+
 				/*
 				if (item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]))
 					item.Parameters.Remove(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]);
-				
+
 				if (item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID]))
 					item.Parameters.Remove(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID]);
 				
 				if (item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]))
 					item.Parameters.Remove(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]);
 				*/
+
+				/* TODO: remove below when API supports exclusion of data */
+				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]))
+					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID], GA_GenericInfo.UserID);
+
+				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID]))
+					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID], GA_GenericInfo.SessionID);
+
+				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]))
+					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.BUILD);
+
 				categories[item.Type].Add(item);
 			}
 			else
