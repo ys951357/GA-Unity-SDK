@@ -156,8 +156,6 @@ public class GA : MonoBehaviour
 	public bool AllowRoaming;
 	public bool ArchiveData;
 	
-	public List<GA_HeatMap> HeatMaps;
-	
 	//These values are used for the GA_Inspector only
 	public bool QAFoldOut;
 	public bool GDFoldOut;
@@ -215,7 +213,12 @@ public class GA : MonoBehaviour
 		
 		if (IncludeSystemSpecs)
 		{
-			GA_Queue.AddItem(GA_GenericInfo.GetGenericInfo(), GA_Submit.CategoryType.GA_Log);
+			List<Dictionary<string, object>> systemspecs = GA_GenericInfo.GetGenericInfo();
+			
+			foreach (Dictionary<string, object> spec in systemspecs)
+			{
+				GA_Queue.AddItem(spec, GA_Submit.CategoryType.GA_Log, false);
+			}
 			RunCoroutine(GA_Queue.SubmitQueue());
 		}
 		
@@ -226,9 +229,12 @@ public class GA : MonoBehaviour
 		{
 			List<GA_Submit.Item> items = GA_Archive.GetArchivedData();
 			
-			foreach (GA_Submit.Item item in items)
+			if (items != null)
 			{
-				GA_Queue.AddItem(item.Parameters, item.Type);
+				foreach (GA_Submit.Item item in items)
+				{
+					GA_Queue.AddItem(item.Parameters, item.Type, false);
+				}
 			}
 		}
 		

@@ -13,17 +13,22 @@ public class GA_Quality : MonoBehaviour
 	
 	public static void NewEvent(string eventName, string message, float x, float y, float z)
 	{
-		CreateNewEvent(eventName, message, x, y, z);
+		CreateNewEvent(eventName, message, x, y, z, false);
 	}
 	
 	public static void NewEvent(string eventName, string message)
 	{
-		CreateNewEvent(eventName, message, null, null, null);
+		CreateNewEvent(eventName, message, null, null, null, false);
 	}
 	
 	public static void NewEvent(string eventName)
 	{
-		CreateNewEvent(eventName, null, null, null, null);
+		CreateNewEvent(eventName, null, null, null, null, false);
+	}
+	
+	public static void NewErrorEvent(string eventName, string message)
+	{
+		CreateNewEvent(eventName, message, null, null, null, true);
 	}
 	
 	#endregion
@@ -39,7 +44,10 @@ public class GA_Quality : MonoBehaviour
 	/// <param name="message">
 	/// A string detailing the event, F.x. the stack trace from an exception <see cref="System.String"/>
 	/// </param>
-	private static void CreateNewEvent(string eventName, string message, float? x, float? y, float? z)
+	/// <param name="stack">
+	/// If true any identical messages in the queue will be merged/stacked as a single message, to save server load
+	/// </param>
+	private static void CreateNewEvent(string eventName, string message, float? x, float? y, float? z, bool stack)
 	{
 		Dictionary<string, object> parameters = new Dictionary<string, object>()
 		{
@@ -70,7 +78,7 @@ public class GA_Quality : MonoBehaviour
 			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Z], z.ToString());
 		}
 		
-		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_Log);
+		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_Log, stack);
 	}
 	
 	#endregion

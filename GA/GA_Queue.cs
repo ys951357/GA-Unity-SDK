@@ -74,7 +74,10 @@ public static class GA_Queue
 	/// <param name="type">
 	/// The GA service to send the message to (see GA_Submit) <see cref="GA_Submit.CategoryType"/>
 	/// </param>
-	public static void AddItem(Dictionary<string, object> parameters, GA_Submit.CategoryType type)
+	/// <param name="stack">
+	/// If true any identical messages in the queue will be merged/stacked as a single message, to save server load
+	/// </param>
+	public static void AddItem(Dictionary<string, object> parameters, GA_Submit.CategoryType type, bool stack)
 	{
 		//No reason to add any more items if we have stopped submitting data or we are not supposed to submit in the first place
 		if (_endsubmit || (Application.isEditor && !GA.RUNINEDITOR))
@@ -91,11 +94,47 @@ public static class GA_Queue
 		
 		if (_submittingData)
 		{
-			_tempQueue.Add(item);
+			if (stack && type == GA_Submit.CategoryType.GA_Log)
+			{
+				StackQueue(_tempQueue, item);
+			}
+			else
+			{
+				_tempQueue.Add(item);
+			}
 		}
 		else
 		{
-			_queue.Add(item);
+			if (stack && type == GA_Submit.CategoryType.GA_Log)
+			{
+				StackQueue(_queue, item);
+			}
+			else
+			{
+				_queue.Add(item);
+			}
+		}
+	}
+	
+	private static void StackQueue(List<GA_Submit.Item> queue, GA_Submit.Item item)
+	{
+		bool stacked = false;
+		for (int i = 0; i < queue.Count; i++)
+		{
+			if (queue[i].Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]) &&
+				item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]) &&
+				queue[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]].Equals(item.Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]]) &&
+				queue[i].Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]) &&
+				item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]) &&
+				queue[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]].Equals(item.Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]]))
+			{
+				stacked = true;
+				queue[i] = new GA_Submit.Item { AddTime = queue[i].AddTime, Parameters = queue[i].Parameters, Type = queue[i].Type, Count = queue[i].Count + 1 };
+			}
+		}
+		if (!stacked)
+		{
+			queue.Add(item);
 		}
 	}
 	

@@ -41,7 +41,7 @@ public static class GA_Debug
 		//We only submit exceptions and errors
         if (GA.SUBMITERRORS && type == LogType.Exception || type == LogType.Error)
 		{
-			GA_Quality.NewEvent("GA Error:" + type.ToString(), logString + " " + stackTrace);
+			GA_Quality.NewErrorEvent("GA Error:" + type.ToString(), logString + " " + stackTrace);
 		}
     }
 	

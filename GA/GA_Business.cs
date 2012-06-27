@@ -64,7 +64,7 @@ public class GA_Business : MonoBehaviour
 			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Z], z.ToString());
 		}
 		
-		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_Purchase);
+		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_Purchase, false);
 	}
 	
 	#endregion

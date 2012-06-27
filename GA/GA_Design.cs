@@ -74,8 +74,8 @@ public static class GA_Design
 		{
 			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Z], z.ToString());
 		}
-		
-		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_Event);
+
+		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_Event, false);
 	}
 	
 	#endregion

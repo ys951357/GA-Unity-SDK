@@ -84,23 +84,35 @@ public static class GA_GenericInfo
 	/// <returns>
 	/// The message to submit to the GA server is a dictionary of all the relevant parameters (containing user ID, session ID, system information, language information, date/time, build version) <see cref="Dictionary<System.String, System.Object>"/>
 	/// </returns>
-	public static Dictionary<string, object> GetGenericInfo()
+	public static List<Dictionary<string, object>> GetGenericInfo()
 	{
-		string system = GetSystem();
-		string language = Application.systemLanguage.ToString();
-		string version = GA.VERSION;
+		//string system = GetSystem();
+		//string language = Application.systemLanguage.ToString();
+		//string version = GA.VERSION;
 		
-		Dictionary<string, object> parameters = new Dictionary<string, object>()
-		{
-			//{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID], UserID },
-			//{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID], SessionID },
-			//{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.BUILD },
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], "GA:SystemSpecs" }
-		};
+		List<Dictionary<string, object>> systemspecs = new List<Dictionary<string, object>>();
 		
-		AddSystemSpecs(parameters);
+		#if !UNITY_IPHONE
 		
-		return parameters;
+		systemspecs.Add(AddSystemSpecs("os", SystemInfo.operatingSystem));
+		systemspecs.Add(AddSystemSpecs("processor_type", SystemInfo.processorType));
+		//systemspecs.Add(AddSystemSpecs("process_count", SystemInfo.processorCount.ToString()));
+		//systemspecs.Add(AddSystemSpecs("sys_mem_size", SystemInfo.systemMemorySize.ToString()));
+		//systemspecs.Add(AddSystemSpecs("gfx_mem_size", SystemInfo.graphicsMemorySize.ToString()));
+		systemspecs.Add(AddSystemSpecs("gfx_name", SystemInfo.graphicsDeviceName));
+		//systemspecs.Add(AddSystemSpecs("gfx_vendor", SystemInfo.graphicsDeviceVendor));
+		//systemspecs.Add(AddSystemSpecs("gfx_id", SystemInfo.graphicsDeviceID.ToString()));
+		//systemspecs.Add(AddSystemSpecs("gfx_vendor_id", SystemInfo.graphicsDeviceVendorID.ToString()));
+		systemspecs.Add(AddSystemSpecs("gfx_version", SystemInfo.graphicsDeviceVersion));
+		//systemspecs.Add(AddSystemSpecs("gfx_shader_level", SystemInfo.graphicsShaderLevel.ToString()));
+		//systemspecs.Add(AddSystemSpecs("gfx_pixel_fillrate", SystemInfo.graphicsPixelFillrate.ToString()));
+		//systemspecs.Add(AddSystemSpecs("sup_shadows", SystemInfo.supportsShadows.ToString()));
+		//systemspecs.Add(AddSystemSpecs("sup_render_textures", SystemInfo.supportsRenderTextures.ToString()));
+		//systemspecs.Add(AddSystemSpecs("sup_image_effects", SystemInfo.supportsImageEffects.ToString()));
+		
+		#endif
+		
+		return systemspecs;
 	}
 	
 	/// <summary>
@@ -146,29 +158,18 @@ public static class GA_GenericInfo
 	/// <param name="parameters">
 	/// The parameters which will be sent to the server <see cref="Dictionary<System.String, System.Object>"/>
 	/// </param>
-	private static void AddSystemSpecs(Dictionary<string, object> parameters)
+	private static Dictionary<string, object> AddSystemSpecs(string key, string type)
 	{
-		#if !UNITY_IPHONE
-		Dictionary<string, object> systemSpecsDictionary = new Dictionary<string, object>();
+		Dictionary<string, object> parameters = new Dictionary<string, object>()
+		{
+			//{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID], UserID },
+			//{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID], SessionID },
+			//{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.BUILD },
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], "system:" + key },
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message], type }
+		};
 		
-		systemSpecsDictionary.Add("os", SystemInfo.operatingSystem);
-		systemSpecsDictionary.Add("process_type", SystemInfo.processorType);
-		systemSpecsDictionary.Add("process_count", SystemInfo.processorCount);
-		systemSpecsDictionary.Add("sys_mem_size", SystemInfo.systemMemorySize);
-		systemSpecsDictionary.Add("gfx_mem_size", SystemInfo.graphicsMemorySize);
-		systemSpecsDictionary.Add("gfx_name", SystemInfo.graphicsDeviceName);
-		systemSpecsDictionary.Add("gfx_vendor", SystemInfo.graphicsDeviceVendor);
-		systemSpecsDictionary.Add("gfx_id", SystemInfo.graphicsDeviceID);
-		systemSpecsDictionary.Add("gfx_vendor_id", SystemInfo.graphicsDeviceVendorID);
-		systemSpecsDictionary.Add("gfx_version", SystemInfo.graphicsDeviceVersion);
-		systemSpecsDictionary.Add("gfx_shader_level", SystemInfo.graphicsShaderLevel);
-		systemSpecsDictionary.Add("gfx_pixel_fillrate", SystemInfo.graphicsPixelFillrate);
-		systemSpecsDictionary.Add("sup_shadows", SystemInfo.supportsShadows);
-		systemSpecsDictionary.Add("sup_render_textures", SystemInfo.supportsRenderTextures);
-		systemSpecsDictionary.Add("sup_image_effects", SystemInfo.supportsImageEffects);
-		
-		parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message], LitJson.JsonMapper.ToJson(systemSpecsDictionary));
-		#endif
+		return parameters;
 	}
 	
 	/// <summary>

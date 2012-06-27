@@ -32,6 +32,7 @@ public static class GA_Submit
 		public CategoryType Type;
 		public Dictionary<string, object> Parameters;
 		public float AddTime;
+		public int Count;
 	}
 	
 	#region private values
@@ -96,36 +97,38 @@ public static class GA_Submit
 		/* Put all the items in the queue into a list containing only the messages of that category type.
 		 * This way we end up with a list of items for each category type */
 		foreach (Item item in queue)
-		{
+		{			
+
 			if (categories.ContainsKey(item.Type))
 			{
+				
 				/* If we already added another item of this type then remove the UserID, SessionID, and Build values if necessary.
 				 * These values only need to be present in each message once, since they will be the same for all items */
-
+				
 				/* TODO: below not supported yet in API (exclude information)
-				 * activate once redundant data can be trimmed */
-
+			 	* activate once redundant data can be trimmed */
+				
 				/*
 				if (item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]))
 					item.Parameters.Remove(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]);
-
+				
 				if (item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID]))
 					item.Parameters.Remove(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID]);
 				
 				if (item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]))
 					item.Parameters.Remove(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]);
 				*/
-
+				
 				/* TODO: remove below when API supports exclusion of data */
 				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]))
 					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID], GA_GenericInfo.UserID);
-
+				
 				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID]))
 					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID], GA_GenericInfo.SessionID);
-
+				
 				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]))
 					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.BUILD);
-
+				
 				categories[item.Type].Add(item);
 			}
 			else
@@ -144,6 +147,8 @@ public static class GA_Submit
 				
 				categories.Add(item.Type, new List<Item> { item });
 			}
+			
+
 		}
 		
 		//For each existing category, submit a message containing all the items of that category type
@@ -192,6 +197,14 @@ public static class GA_Submit
 					errorEvent(items);
 				}
 				yield break;
+			}
+			
+			if (items[i].Count > 1)
+			{
+				if (items[i].Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]))
+				{
+					items[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]] = items[i].Count + "x " + items[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]].ToString();
+				}
 			}
 			
 			Dictionary<string, object> parameters = items[i].Parameters;
