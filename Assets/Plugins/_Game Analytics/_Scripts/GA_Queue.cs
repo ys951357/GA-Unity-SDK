@@ -152,6 +152,25 @@ public static class GA_Queue
 			yield return new WaitForSeconds(0.5f);
 		}
 		
+		//If we have internet connection then add any archived data to the submit queue
+		if (GA.ARCHIVEDATA && GA.CheckInternetConnectivity())
+		{
+			List<GA_Submit.Item> archivedItems = GA_Archive.GetArchivedData();
+			
+			if (archivedItems != null && archivedItems.Count > 0)
+			{
+				foreach (GA_Submit.Item item in archivedItems)
+				{
+					GA_Queue.AddItem(item.Parameters, item.Type, false);
+				}
+			
+				if (GA.DEBUG)
+				{
+					Debug.Log("GA: Network connection detected. Adding archived data to next submit queue.");
+				}
+			}
+		}
+		
 		//If we have something to submit and we have not stopped submitting completely then we start submitting data
 		if (_queue.Count > 0 && !_submittingData && !_endsubmit)
 		{
@@ -171,6 +190,9 @@ public static class GA_Queue
 		//If we have not stopped submitting completely then it is time to submit again
 		if (!_endsubmit)
 		{
+			//for tracking frames per second
+			GA.INSTANCE.GetComponent<GA_SpecialEvents>().SubmitAverageFPS();
+			
 			GA.RunCoroutine(SubmitQueue());
 		}
 	}

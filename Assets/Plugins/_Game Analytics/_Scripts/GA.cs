@@ -1,6 +1,6 @@
 /// <summary>
-/// This is the main Game Analytics class, and the only class which the user should have to manually instanciate (add to a game object).
-/// This class sets up and starts the Game Analytics service.
+/// This is the main Game Analytics class. This class sets up and starts the Game Analytics service.
+/// The entire Game Analytics Unity3D package, including all scripts, has been designed and implemented by Simon Millard for Game Analytics (www.gameanalytics.com)
 /// </summary>
 
 using UnityEngine;
@@ -108,12 +108,60 @@ public class GA : MonoBehaviour
 				return false;
 		}
 	}
-		
+	
+	/// <summary>
+	/// Gets a value indicating whether to submit average frames per second.
+	/// </summary>
+	/// <value>
+	/// SUBMITERRORS true/false
+	/// </value>
+	public static bool SUBMITAVERAGEFPS
+	{
+		get {
+			if (_instance != null)
+				return _instance.SubmitFpsAverage;
+			else
+				return false;
+		}
+	}
+	
+	/// <summary>
+	/// Gets a value indicating whether to submit a message whenever the frames per second falls below a certain threshold.
+	/// </summary>
+	/// <value>
+	/// SUBMITERRORS true/false
+	/// </value>
+	public static bool SUBMITCRITICALFPS
+	{
+		get {
+			if (_instance != null)
+				return _instance.SubmitFpsCritical;
+			else
+				return false;
+		}
+	}
+	
+	/// <summary>
+	/// Gets a value indicating the frames per second threshold for when to submit a critical FPS message.
+	/// </summary>
+	/// <value>
+	/// SUBMITERRORS int
+	/// </value>
+	public static int FPSCRITICALTHRESHOLD
+	{
+		get {
+			if (_instance != null)
+				return _instance.FpsCriticalThreshold;
+			else
+				return 99;
+		}
+	}
+	
 	/// <summary>
 	/// Gets a value indicating whether to send data while on a roaming network with a mobile device.
 	/// </summary>
 	/// <value>
-	/// SUBMITERRORS true/false
+	/// ALLOWROAMING true/false
 	/// </value>
 	public static bool ALLOWROAMING
 	{
@@ -129,7 +177,7 @@ public class GA : MonoBehaviour
 	/// Gets a value indicating whether to archive data when no internet connection is available. See GA_Archive.
 	/// </summary>
 	/// <value>
-	/// SUBMITERRORS true/false
+	/// ARCHIVEDATA true/false
 	/// </value>
 	public static bool ARCHIVEDATA
 	{
@@ -138,6 +186,38 @@ public class GA : MonoBehaviour
 				return _instance.ArchiveData;
 			else
 				return false;
+		}
+	}
+	
+	/// <summary>
+	/// Is the user feedback GUI enabled?
+	/// </summary>
+	/// <value>
+	/// GUIENABLED true/false
+	/// </value>
+	public static bool GUIENABLED
+	{
+		get {
+			if (_instance != null)
+				return _instance.GuiEnabled;
+			else
+				return false;
+		}
+	}
+	
+	/// <summary>
+	/// Get the transform target for events such as GUI user feedback and bug reports, critical FPS, etc.
+	/// </summary>
+	/// <value>
+	/// GUITARGET Transform
+	/// </value>
+	public static Transform TRACKTARGET
+	{
+		get {
+			if (_instance != null)
+				return _instance.TrackTarget;
+			else
+				return null;
 		}
 	}
 	
@@ -153,8 +233,13 @@ public class GA : MonoBehaviour
 	public bool IncludeSystemSpecs;
 	public bool IncludeSceneChange;
 	public bool SubmitErrors;
+	public bool SubmitFpsAverage;
+	public bool SubmitFpsCritical;
+	public int FpsCriticalThreshold = 30;
 	public bool AllowRoaming;
 	public bool ArchiveData;
+	public bool GuiEnabled;
+	public Transform TrackTarget;
 	
 	//These values are used for the GA_Inspector only
 	public bool QAFoldOut;
@@ -163,6 +248,7 @@ public class GA : MonoBehaviour
 	public bool PFoldOut;
 	public bool HMFoldOut;
 	public bool MobileFoldOut;
+	public bool GuiFoldOut;
 	
 	#endregion
 	
@@ -198,6 +284,9 @@ public class GA : MonoBehaviour
 		
 		_instance = this;
 		DontDestroyOnLoad(this);
+		
+		gameObject.AddComponent<GA_SpecialEvents>();
+		gameObject.AddComponent<GA_Gui>();
 	}
 	
 	/// <summary>
@@ -209,8 +298,6 @@ public class GA : MonoBehaviour
 		
 		Application.RegisterLogCallback(GA_Debug.HandleLog);
 		
-		gameObject.AddComponent<GA_SpecialEvents>();
-		
 		if (IncludeSystemSpecs)
 		{
 			List<Dictionary<string, object>> systemspecs = GA_GenericInfo.GetGenericInfo();
@@ -219,24 +306,10 @@ public class GA : MonoBehaviour
 			{
 				GA_Queue.AddItem(spec, GA_Submit.CategoryType.GA_Log, false);
 			}
-			RunCoroutine(GA_Queue.SubmitQueue());
 		}
 		
-		//If we can get an internet connection then add any archived data to the submit queue
-		if  (ArchiveData &&
-			(Application.internetReachability == NetworkReachability.ReachableViaLocalAreaNetwork || 
-			(Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork && GA.ALLOWROAMING)))
-		{
-			List<GA_Submit.Item> items = GA_Archive.GetArchivedData();
-			
-			if (items != null)
-			{
-				foreach (GA_Submit.Item item in items)
-				{
-					GA_Queue.AddItem(item.Parameters, item.Type, false);
-				}
-			}
-		}
+		//Start the submit queue for sending messages to the server
+		RunCoroutine(GA_Queue.SubmitQueue());
 		
 		//If we're playing the unity demo "AngryBots", then add the GA_AngryBots component
 		if (Application.loadedLevelName == "AngryBots")
@@ -268,6 +341,42 @@ public class GA : MonoBehaviour
 		}
 		
 		return _instance.StartCoroutine(routine);
+	}
+	
+	/// <summary>
+	/// Checks the internet connectivity.
+	/// </summary>
+	/// <returns>
+	/// True if the device is connected to the internet, otherwise false.
+	/// </returns>
+	public static bool CheckInternetConnectivity()
+	{
+		#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN
+		
+		try
+		{
+			System.Net.Sockets.TcpClient clnt= new System.Net.Sockets.TcpClient("www.google.com", 80);
+			clnt.Close();
+			return true;
+		}
+		catch(System.Exception)
+		{
+			return false;
+		}
+		
+		#else
+		
+		if  (Application.internetReachability == NetworkReachability.ReachableViaLocalAreaNetwork || 
+			(Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork && ALLOWROAMING))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
+		#endif
 	}
 	
 	#endregion

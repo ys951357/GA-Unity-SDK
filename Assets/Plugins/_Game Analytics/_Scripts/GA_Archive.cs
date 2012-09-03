@@ -26,6 +26,7 @@ public static class GA_Archive
 	public static void ArchiveData(string json, GA_Submit.CategoryType serviceType)
 	{
 		#if !UNITY_WEBPLAYER
+		
 		StreamWriter fileWriter = null;
 		string fileName = Application.persistentDataPath + "/" + FILE_NAME;
 		
@@ -43,6 +44,7 @@ public static class GA_Archive
 			fileWriter.WriteLine(serviceType + " " + json);
 			fileWriter.Close();
 		}
+		
 		#endif
 	}
 	
@@ -56,8 +58,11 @@ public static class GA_Archive
 	public static List<GA_Submit.Item> GetArchivedData()
 	{
 		#if UNITY_WEBPLAYER
+		
 		return null;
+		
 		#else
+		
 		List<GA_Submit.Item> items = new List<GA_Submit.Item>();
 		
 		StreamReader fileReader = null;
@@ -115,6 +120,7 @@ public static class GA_Archive
 		}
 		
 		return items;
+		
 		#endif
 	}
 }

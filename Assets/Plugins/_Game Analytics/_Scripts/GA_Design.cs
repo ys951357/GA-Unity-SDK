@@ -1,24 +1,28 @@
+/// <summary>
+/// This class handles game design events, such as kills, deaths, high scores, etc.
+/// </summary>
+
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public static class GA_Events
+public static class GA_Design
 {
 	#region public methods
 	
-	public static void NewEvent(string eventName, string eventValue, float x, float y)
+	public static void NewEvent(string eventName, float? eventValue, float x, float y, float z)
 	{
-		CreateNewEvent(eventName, eventValue, x, y);
+		CreateNewEvent(eventName, eventValue, x, y, z);
 	}
 	
-	public static void NewEvent(string eventName, string eventValue)
+	public static void NewEvent(string eventName, float eventValue)
 	{
-		CreateNewEvent(eventName, eventValue, null, null);
+		CreateNewEvent(eventName, eventValue, null, null, null);
 	}
 	
 	public static void NewEvent(string eventName)
 	{
-		CreateNewEvent(eventName, null, null, null);
+		CreateNewEvent(eventName, null, null, null, null);
 	}
 	
 	#endregion
@@ -40,17 +44,15 @@ public static class GA_Events
 	/// <param name="y">
 	/// The y coordinate of the event occurence. This can be null <see cref="System.Nullable<System.Single>"/>
 	/// </param>
-	private static void CreateNewEvent(string eventName, string eventValue, float? x, float? y)
+	private static void CreateNewEvent(string eventName, float? eventValue, float? x, float? y, float? z)
 	{
 		Dictionary<string, object> parameters = new Dictionary<string, object>()
 		{
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID], GA_GenericInfo.SessionID },
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], eventName },
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], Application.loadedLevelName },
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.TimeStamp], GA_GenericInfo.TimeStamp }
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], Application.loadedLevelName }
 		};
 		
-		if (eventValue != null && eventValue != "")
+		if (eventValue.HasValue)
 		{
 			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Value], eventValue.ToString());
 		}
@@ -65,7 +67,12 @@ public static class GA_Events
 			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Y], y.ToString());
 		}
 		
-		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_Event);
+		if (z.HasValue)
+		{
+			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Z], z.ToString());
+		}
+
+		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_Event, false);
 	}
 	
 	#endregion

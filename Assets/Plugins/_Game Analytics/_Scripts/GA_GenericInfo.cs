@@ -59,7 +59,7 @@ public static class GA_GenericInfo
 	public static string TimeStamp
 	{
 		get {
-			return ((DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000).ToString(); //DateTime.UtcNow.Subtract(_epochStart).TotalSeconds.ToString();
+			return ((DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000).ToString();
 		}
 	}
 	
@@ -69,7 +69,6 @@ public static class GA_GenericInfo
 	
 	private static string _userID;
 	private static string _sessionID;
-	//private static DateTime _epochStart = new System.DateTime(1970, 1, 1, 8, 0, 0, System.DateTimeKind.Utc);
 	
 	#endregion
 	
@@ -86,29 +85,37 @@ public static class GA_GenericInfo
 	/// </returns>
 	public static List<Dictionary<string, object>> GetGenericInfo()
 	{
-		//string system = GetSystem();
-		//string language = Application.systemLanguage.ToString();
-		//string version = GA.VERSION;
-		
 		List<Dictionary<string, object>> systemspecs = new List<Dictionary<string, object>>();
+		
+		/*
+		 * Apple does not allow tracking of device specific data:
+		 * "You may not use analytics software in your application to collect and send device data to a third party"
+		 * - iOS Developer Program License Agreement: http://www.scribd.com/doc/41213383/iOS-Developer-Program-License-Agreement
+		 */
 		
 		#if !UNITY_IPHONE
 		
 		systemspecs.Add(AddSystemSpecs("os", SystemInfo.operatingSystem));
 		systemspecs.Add(AddSystemSpecs("processor_type", SystemInfo.processorType));
+		systemspecs.Add(AddSystemSpecs("gfx_name", SystemInfo.graphicsDeviceName));
+		systemspecs.Add(AddSystemSpecs("gfx_version", SystemInfo.graphicsDeviceVersion));
+		
+		// Unity provides lots of additional system info which might be worth tracking for some:
 		//systemspecs.Add(AddSystemSpecs("process_count", SystemInfo.processorCount.ToString()));
 		//systemspecs.Add(AddSystemSpecs("sys_mem_size", SystemInfo.systemMemorySize.ToString()));
 		//systemspecs.Add(AddSystemSpecs("gfx_mem_size", SystemInfo.graphicsMemorySize.ToString()));
-		systemspecs.Add(AddSystemSpecs("gfx_name", SystemInfo.graphicsDeviceName));
 		//systemspecs.Add(AddSystemSpecs("gfx_vendor", SystemInfo.graphicsDeviceVendor));
 		//systemspecs.Add(AddSystemSpecs("gfx_id", SystemInfo.graphicsDeviceID.ToString()));
 		//systemspecs.Add(AddSystemSpecs("gfx_vendor_id", SystemInfo.graphicsDeviceVendorID.ToString()));
-		systemspecs.Add(AddSystemSpecs("gfx_version", SystemInfo.graphicsDeviceVersion));
 		//systemspecs.Add(AddSystemSpecs("gfx_shader_level", SystemInfo.graphicsShaderLevel.ToString()));
 		//systemspecs.Add(AddSystemSpecs("gfx_pixel_fillrate", SystemInfo.graphicsPixelFillrate.ToString()));
 		//systemspecs.Add(AddSystemSpecs("sup_shadows", SystemInfo.supportsShadows.ToString()));
 		//systemspecs.Add(AddSystemSpecs("sup_render_textures", SystemInfo.supportsRenderTextures.ToString()));
 		//systemspecs.Add(AddSystemSpecs("sup_image_effects", SystemInfo.supportsImageEffects.ToString()));
+		
+		#else
+		
+		systemspecs.Add(AddSystemSpecs("os", "iOS"));
 		
 		#endif
 		
@@ -153,7 +160,7 @@ public static class GA_GenericInfo
 	#region private methods
 	
 	/// <summary>
-	/// Adds detailed system specifications regarding the users/players device to the parameters. This does not work on IPhone.
+	/// Adds detailed system specifications regarding the users/players device to the parameters.
 	/// </summary>
 	/// <param name="parameters">
 	/// The parameters which will be sent to the server <see cref="Dictionary<System.String, System.Object>"/>
@@ -162,9 +169,6 @@ public static class GA_GenericInfo
 	{
 		Dictionary<string, object> parameters = new Dictionary<string, object>()
 		{
-			//{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID], UserID },
-			//{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID], SessionID },
-			//{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.BUILD },
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], "system:" + key },
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message], type }
 		};
@@ -210,6 +214,10 @@ public static class GA_GenericInfo
 
 		#if UNITY_XBOX360
 		return "XBOX";
+		#endif
+		
+		#if UNITY_FLASH
+		return "FLASH";
 		#endif
 	}
 	

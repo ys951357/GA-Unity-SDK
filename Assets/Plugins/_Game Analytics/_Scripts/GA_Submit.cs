@@ -182,7 +182,7 @@ public static class GA_Submit
 		
 		//Since all the items must have the same category (we make sure they do below) we can get the category from the first item
 		CategoryType serviceType = items[0].Type;
-		string url = GetURL(serviceType);
+		string url = GetURL(Categories[serviceType]);
 		
 		//Make sure that all items are of the same category type, and put all the parameter collections into a list
 		List<Dictionary<string, object>> itemsParameters = new List<Dictionary<string, object>>();
@@ -214,16 +214,30 @@ public static class GA_Submit
 		//Make a JSON array string out of the list of parameter collections
 		string json = JsonMapper.ToJson(itemsParameters);
 		
-		/* Mobile devices: If we do not have access to a network connection (or we are roaming and roaming is disabled),
+		/* If we do not have access to a network connection (or we are roaming (mobile devices) and GA.ALLOWROAMING is false),
 		 * and data is set to be archived, then archive the data and pretend the message was sent successfully */
-		if  (GA.ARCHIVEDATA &&
-			(Application.internetReachability == NetworkReachability.NotReachable || 
-			(Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork && !GA.ALLOWROAMING)))
+		bool internetConnectivity = GA.CheckInternetConnectivity();
+		
+		if  (GA.ARCHIVEDATA && !internetConnectivity)
 		{
+			if (GA.DEBUG)
+			{
+				Debug.Log("GA: Archiving data (no network connection).");
+			}
+			
 			GA_Archive.ArchiveData(json, serviceType);
 			if (successEvent != null)
 			{
 				successEvent(items, true);
+			}
+			yield break;
+		}
+		else if (!internetConnectivity)
+		{
+			Debug.LogWarning("GA Error: No network connection.");
+			if (errorEvent != null)
+			{
+				errorEvent(items);
 			}
 			yield break;
 		}
@@ -244,7 +258,7 @@ public static class GA_Submit
 		if (GA.DEBUG)
 		{
 			Debug.Log("GA URL: " + url);
-			Debug.Log("GA Request: " + json);
+			Debug.Log("GA Submit: " + json);
 			Debug.Log("GA Hash: " + CreateMD5Hash(json));
 		}
 		
@@ -353,22 +367,18 @@ public static class GA_Submit
 		return _baseURL;
 	}
 	
-	#endregion
-	
-	#region private methods
-	
 	/// <summary>
 	/// Gets the url on the GA server matching the specific service we are interested in
 	/// </summary>
 	/// <param name="category">
-	/// Determines the GA service/category <see cref="CategoryType"/>
+	/// Determines the GA service/category <see cref="System.String"/>
 	/// </param>
 	/// <returns>
 	/// A string representing the url matching our service choice on the GA server <see cref="System.String"/>
 	/// </returns>
-	private static string GetURL(CategoryType category)
+	public static string GetURL(string category)
 	{
-		return _baseURL + "/" + _version + "/" + _publicKey + "/" + Categories[category];
+		return _baseURL + "/" + _version + "/" + _publicKey + "/" + category;
 	}
 	
 	/// <summary>
@@ -380,14 +390,8 @@ public static class GA_Submit
 	/// <returns>
 	/// The MD5 hash encoded result of input + private key <see cref="System.String"/>
 	/// </returns>
-	private static string CreateMD5Hash(string input)
+	public static string CreateMD5Hash(string input)
 	{
-		/* This was used when the MD5 hash had to be converted to Base64, etc.
-		MD5 md5Hash = MD5.Create();
-		byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input + _privateKey));
-		return BitConverter.ToString(data); //System.Convert.ToBase64String(data);
-		*/
-		
 		// Gets the MD5 hash for input and _privateKey
 		MD5 md5 = new MD5CryptoServiceProvider();
 		byte[] data = Encoding.Default.GetBytes(input + _privateKey);

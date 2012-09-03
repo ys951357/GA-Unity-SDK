@@ -25,7 +25,7 @@ public static class GA_Debug
 	/// </param>
 	public static void HandleLog(string logString, string stackTrace, LogType type)
 	{
-		//Only used if GA_GUI script is added to the GA object (for testing)
+		//Only used if the GA_DebugGUI script is added to the GA object (for testing)
 		if (_showLogOnGUI)
 		{
 			if (Messages == null)
