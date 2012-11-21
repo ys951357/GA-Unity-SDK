@@ -1,3 +1,12 @@
+### Recent Changes:
+
+##### v.0.2.1:
+
+- Restructuring of the inspector view.
+- Added Drag'n'Drop event tracking for basic events.
+- Improved QA functions, including error handling and tracking.
+- Lots of minor tweaks, improvements and bug fixes.
+
 # Game Analytics Unity3D Wrapper
 
 The Game Analytics Unity3D wrapper is a plugin for Unity which makes it easy to send game event data to the Game Analytics service for visualization. By collecting data from players playing your game you will be able to identify bugs and balance issues, track purchases, and determine how your players really play your game!
