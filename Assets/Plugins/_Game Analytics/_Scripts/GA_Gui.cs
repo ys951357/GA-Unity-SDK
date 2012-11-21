@@ -9,13 +9,15 @@ public class GA_Gui : MonoBehaviour
 {
 	public enum WindowType { None, MessageTypeWindow, FeedbackWindow, BugWindow };
 	
+	// feedback/bug report windows
 	private Texture _gaLogo;
 	private WindowType _windowType = WindowType.None;
 	
-	// feedback/bug report windows
-	private Rect _messageTypeWindowRect = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 75, 400, 150);
-	private Rect _feedbackWindowRect = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 150, 400, 300);
-	private Rect _bugWindowRect = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 150, 400, 300);
+	private bool _popUpError = false;
+	
+	private Rect _messageTypeWindowRect;
+	private Rect _feedbackWindowRect;
+	private Rect _bugWindowRect;
 	
 	private string _topic = "";
 	private string _details = "";
@@ -23,6 +25,11 @@ public class GA_Gui : MonoBehaviour
 	void Start ()
 	{
 		_gaLogo = (Texture)Resources.Load("_Game Analytics/_Images/gaLogo", typeof(Texture));
+		
+		_messageTypeWindowRect = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 75, 400, 150);
+		
+		_feedbackWindowRect = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 150, 400, 300);
+		_bugWindowRect = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 150, 400, 300);
 	}
 	
 	void OnGUI ()
@@ -31,7 +38,7 @@ public class GA_Gui : MonoBehaviour
 		GUI.skin.window.onNormal.background = GUI.skin.window.normal.background;
 		
 		// feedback/bug report windows
-		if (GA.GUIENABLED)
+		if (GA.GUIENABLED || _windowType != WindowType.None)
 		{
 			switch (_windowType)
 			{
@@ -76,6 +83,8 @@ public class GA_Gui : MonoBehaviour
 	
 	void FeedbackWindow(int windowID)
 	{
+		int heightAdd = 0;
+		
 		GUI.Label(new Rect(10, 15, 380, 50), "Submit feedback");
 		
 		GUI.Label(new Rect(10, 50, 380, 20), "Topic*");
@@ -85,13 +94,13 @@ public class GA_Gui : MonoBehaviour
 		GUI.Label(new Rect(10, 100, 380, 20), "Details*");
 		_details = GUI.TextArea(new Rect(10, 120, 380, 130), _details, 400);
 		
-		if (GUI.Button(new Rect(10, 260, 185, 30), "Cancel"))
+		if (GUI.Button(new Rect(10, 260 + heightAdd, 185, 30), "Cancel"))
 		{
 			_topic = "";
 			_details = "";
 			_windowType = WindowType.None;
 		}
-		if (GUI.Button(new Rect(205, 260, 185, 30), "Submit"))
+		if (GUI.Button(new Rect(205, 260 + heightAdd, 185, 30), "Submit"))
 		{
 			if (_topic.Length > 0 && _details.Length > 0)
 			{
@@ -101,7 +110,8 @@ public class GA_Gui : MonoBehaviour
 					target = GA.TRACKTARGET.position;
 				}
 				
-				GA_Quality.NewEvent("GA Feedback:"+_topic, _details, target.x, target.y, target.z);
+				GA_Quality.NewEvent("Feedback:"+_topic, _details, target.x, target.y, target.z);
+				
 				_topic = "";
 				_details = "";
 				_windowType = WindowType.None;
@@ -115,7 +125,12 @@ public class GA_Gui : MonoBehaviour
 	
 	void BugWindow(int windowID)
 	{
-		GUI.Label(new Rect(10, 15, 380, 50), "Submit bug report");
+		int heightAdd = 0;
+		
+		if (_popUpError)
+			GUI.Label(new Rect(10, 10, 385, 50), "Oops! It looks like an error just occurred! Please fill out this form with as many details as possible (what you were doing, etc.).");
+		else
+			GUI.Label(new Rect(10, 15, 380, 50), "Submit bug report");
 		
 		GUI.Label(new Rect(10, 50, 380, 20), "Topic*");
 		GUI.SetNextControlName("TopicField");
@@ -124,13 +139,14 @@ public class GA_Gui : MonoBehaviour
 		GUI.Label(new Rect(10, 100, 380, 20), "Details*");
 		_details = GUI.TextArea(new Rect(10, 120, 380, 130), _details, 400);
 		
-		if (GUI.Button(new Rect(10, 260, 185, 30), "Cancel"))
+		if (GUI.Button(new Rect(10, 260 + heightAdd, 185, 30), "Cancel"))
 		{
 			_topic = "";
 			_details = "";
 			_windowType = WindowType.None;
+			_popUpError = false;
 		}
-		if (GUI.Button(new Rect(205, 260, 185, 30), "Submit"))
+		if (GUI.Button(new Rect(205, 260 + heightAdd, 185, 30), "Submit"))
 		{
 			if (_topic.Length > 0 && _details.Length > 0)
 			{
@@ -140,10 +156,15 @@ public class GA_Gui : MonoBehaviour
 					target = GA.TRACKTARGET.position;
 				}
 				
-				GA_Quality.NewEvent("GA Bug Report:"+_topic, _details, target.x, target.y, target.z);
+				if (_popUpError)
+					GA_Debug.SubmitError("Crash Report:"+_topic, _details);
+				else
+					GA_Quality.NewEvent("Bug Report:"+_topic, _details, target.x, target.y, target.z);
+				
 				_topic = "";
 				_details = "";
 				_windowType = WindowType.None;
+				_popUpError = false;
 			}
 			else
 			{
@@ -153,4 +174,10 @@ public class GA_Gui : MonoBehaviour
     }
 	
 	#endregion
+	
+	public void OpenBugGUI()
+	{
+		_windowType = WindowType.BugWindow;
+		_popUpError = true;
+	}
 }

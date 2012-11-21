@@ -190,8 +190,8 @@ public static class GA_Queue
 		//If we have not stopped submitting completely then it is time to submit again
 		if (!_endsubmit)
 		{
-			//for tracking frames per second
-			GA.INSTANCE.GetComponent<GA_SpecialEvents>().SubmitAverageFPS();
+			//for tracking critical frames per second
+			GA.INSTANCE.GetComponent<GA_SpecialEvents>().SubmitCriticalFPS();
 			
 			GA.RunCoroutine(SubmitQueue());
 		}

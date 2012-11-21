@@ -64,7 +64,7 @@ public static class GA_Request
 		
 		//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
 		Hashtable headers = new Hashtable();
-		headers.Add("Authorization", GA_Submit.CreateMD5Hash(json));
+		headers.Add("Authorization", GA_Submit.CreateMD5Hash(json + GA_Submit.GetPrivateKey()));
 		
 		//Try to send the data
 		WWW www = new WWW(url, data, headers);
@@ -76,7 +76,7 @@ public static class GA_Request
 		{
 			Debug.Log("GA URL: " + url);
 			Debug.Log("GA Request: " + json);
-			Debug.Log("GA Hash: " + GA_Submit.CreateMD5Hash(json));
+			Debug.Log("GA Hash: " + GA_Submit.CreateMD5Hash(json + GA_Submit.GetPrivateKey()));
 		}
 		
 		try

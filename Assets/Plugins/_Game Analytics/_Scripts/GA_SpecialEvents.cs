@@ -15,7 +15,7 @@ public class GA_SpecialEvents : MonoBehaviour
 	private int _frameCountAvg = 0;
 	private float _lastUpdateAvg = 0f;
 	private int _frameCountCrit = 0;
-	private float _nextUpdateCrit = 0f;
+	private float _lastUpdateCrit = 0f;
 	
 	#endregion
 	
@@ -38,26 +38,6 @@ public class GA_SpecialEvents : MonoBehaviour
 		if (GA.SUBMITCRITICALFPS)
 		{
 			_frameCountCrit++;
-			_nextUpdateCrit += Time.deltaTime;
-			
-			if (_nextUpdateCrit > 1f)
-			{
-				if (_frameCountCrit < GA.FPSCRITICALTHRESHOLD)
-				{
-					//Uses track target
-					if (GA.TRACKTARGET != null)
-					{
-						GA_Quality.NewEvent("GA:CriticalFPS", "FPS: " + _frameCountCrit, GA.TRACKTARGET.position.x, GA.TRACKTARGET.position.y, GA.TRACKTARGET.position.z);
-					}
-					else
-					{
-						GA_Quality.NewEvent("GA:CriticalFPS", "FPS: " + _frameCountCrit);
-					}
-				}
-				
-				_nextUpdateCrit -= 1f;
-				_frameCountCrit = 0;
-			}
 		}
 	}
 	
@@ -71,6 +51,9 @@ public class GA_SpecialEvents : MonoBehaviour
 #if UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN
 		if (!GA_Queue.QUITONSUBMIT)
 		{
+			SubmitAverageFPS();
+			GA_Tracker.SendTrackingData();
+			
 			GA_Queue.QUITONSUBMIT = true;
 			GA_Design.NewEvent("GA:ExitGame");
 			GA_Queue.SubmitQueue();
@@ -89,14 +72,42 @@ public class GA_SpecialEvents : MonoBehaviour
 			_lastUpdateAvg = Time.time;
 			_frameCountAvg = 0;
 			
-			//Uses track target
-			if (GA.TRACKTARGET != null)
+			if (fpsSinceUpdate > 0)
 			{
-				GA_Quality.NewEvent("GA:AverageFPS", "FPS: " + fpsSinceUpdate, GA.TRACKTARGET.position.x, GA.TRACKTARGET.position.y, GA.TRACKTARGET.position.z);
+				//Uses track target
+				if (GA.TRACKTARGET != null)
+				{
+					GA_Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString(), GA.TRACKTARGET.position.x, GA.TRACKTARGET.position.y, GA.TRACKTARGET.position.z);
+				}
+				else
+				{
+					GA_Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString());
+				}
 			}
-			else
+		}
+	}
+	
+	public void SubmitCriticalFPS()
+	{
+		//average FPS
+		if (GA.SUBMITCRITICALFPS)
+		{
+			float timeSinceUpdate = Time.time - _lastUpdateCrit;
+			float fpsSinceUpdate = _frameCountCrit / timeSinceUpdate;
+			_lastUpdateCrit = Time.time;
+			_frameCountCrit = 0;
+			
+			if (fpsSinceUpdate <= GA.FPSCRITICALTHRESHOLD)
 			{
-				GA_Quality.NewEvent("GA:AverageFPS", "FPS: " + fpsSinceUpdate);
+				//Uses track target
+				if (GA.TRACKTARGET != null)
+				{
+					GA_Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString(), GA.TRACKTARGET.position.x, GA.TRACKTARGET.position.y, GA.TRACKTARGET.position.z);
+				}
+				else
+				{
+					GA_Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString());
+				}
 			}
 		}
 	}
@@ -107,6 +118,9 @@ public class GA_SpecialEvents : MonoBehaviour
 	
 	private void SceneChange()
 	{
+		SubmitAverageFPS();
+		GA_Tracker.SendTrackingData();
+		
 		if (GA.INCLUDESCENECHANGE)
 		{
 			GA_Design.NewEvent("GA:LevelStarted", Time.time - _lastLevelStartTime);

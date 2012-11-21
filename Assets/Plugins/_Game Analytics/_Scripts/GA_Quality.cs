@@ -26,9 +26,9 @@ public class GA_Quality : MonoBehaviour
 		CreateNewEvent(eventName, null, null, null, null, false);
 	}
 	
-	public static void NewErrorEvent(string eventName, string message)
+	public static void NewErrorEvent(string eventName, string message, float x, float y, float z)
 	{
-		CreateNewEvent(eventName, message, null, null, null, true);
+		CreateNewEvent(eventName, message, x, y, z, true);
 	}
 	
 	#endregion

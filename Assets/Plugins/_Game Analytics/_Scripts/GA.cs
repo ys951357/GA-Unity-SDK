@@ -8,19 +8,35 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class GA : MonoBehaviour
-{	
+{
+	/// <summary>
+	/// Types of help given in the help box of the GA inspector
+	/// </summary>
+	public enum HelpTypes { None, FpsCriticalAndTrackTargetHelp, GuiAndTrackTargetHelp, IncludeSystemSpecsHelp, ProvideCustomUserID };
+	public enum MessageTypes { None, Error, Info, Warning };
+	
+	/// <summary>
+	/// A message and message type for the help box displayed on the GUI inspector
+	/// </summary>
+	public struct HelpInfo
+	{
+		public string Message;
+		public MessageTypes MsgType;
+		public HelpTypes HelpType;
+	}
+	
 	#region public static values
 	
 	/// <summary>
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
-	public static string VERSION = "1.0";
+	public static string VERSION = "0.2.1";
 	
 	/// <summary>
 	/// Gets the instance
 	/// </summary>
 	/// <value>
-	/// The instance
+	/// Instance GA
 	/// </value>
 	public static GA INSTANCE
 	{
@@ -65,7 +81,7 @@ public class GA : MonoBehaviour
 	/// Gets the current game build supplied by the user
 	/// </summary>
 	/// <value>
-	/// The BUILD
+	/// BUILD string
 	/// </value>
 	public static string BUILD
 	{
@@ -110,10 +126,58 @@ public class GA : MonoBehaviour
 	}
 	
 	/// <summary>
+	/// Gets a value indicating whether to submit the stack trace whenever an error or exception occurs. See GA_Debug.
+	/// </summary>
+	/// <value>
+	/// SUBMITSTACKTRACE true/false
+	/// </value>
+	public static bool SUBMITSTACKTRACE
+	{
+		get {
+			if (_instance != null)
+				return _instance.SubmitErrorStackTrace;
+			else
+				return false;
+		}
+	}
+	
+	/// <summary>
+	/// Gets a value indicating whether to submit system information whenever an error or exception occurs. See GA_Debug.
+	/// </summary>
+	/// <value>
+	/// SUBMITERRORSYSTEMINFO true/false
+	/// </value>
+	public static bool SUBMITERRORSYSTEMINFO
+	{
+		get {
+			if (_instance != null)
+				return _instance.SubmitErrorSystemInfo;
+			else
+				return false;
+		}
+	}
+	
+	/// <summary>
+	/// Gets a value indicating the maximum number of errors or exceptions tracked per session. See GA_Debug.
+	/// </summary>
+	/// <value>
+	/// MAXERRORCOUNT
+	/// </value>
+	public static int MAXERRORCOUNT
+	{
+		get {
+			if (_instance != null)
+				return _instance.MaxErrorCount;
+			else
+				return 0;
+		}
+	}
+	
+	/// <summary>
 	/// Gets a value indicating whether to submit average frames per second.
 	/// </summary>
 	/// <value>
-	/// SUBMITERRORS true/false
+	/// SUBMITAVERAGEFPS true/false
 	/// </value>
 	public static bool SUBMITAVERAGEFPS
 	{
@@ -129,7 +193,7 @@ public class GA : MonoBehaviour
 	/// Gets a value indicating whether to submit a message whenever the frames per second falls below a certain threshold.
 	/// </summary>
 	/// <value>
-	/// SUBMITERRORS true/false
+	/// SUBMITCRITICALFPS true/false
 	/// </value>
 	public static bool SUBMITCRITICALFPS
 	{
@@ -145,7 +209,7 @@ public class GA : MonoBehaviour
 	/// Gets a value indicating the frames per second threshold for when to submit a critical FPS message.
 	/// </summary>
 	/// <value>
-	/// SUBMITERRORS int
+	/// FPSCRITICALTHRESHOLD int
 	/// </value>
 	public static int FPSCRITICALTHRESHOLD
 	{
@@ -221,6 +285,38 @@ public class GA : MonoBehaviour
 		}
 	}
 	
+	/// <summary>
+	/// Gets the maximum file size on the disk for archiving data in bytes.
+	/// </summary>
+	/// <value>
+	/// ARCHIVEMAXFILESIZE long
+	/// </value>
+	public static long ARCHIVEMAXFILESIZE
+	{
+		get {
+			if (_instance != null)
+				return _instance.ArchiveMaxFileSize;
+			else
+				return 0;
+		}
+	}
+	
+	/// <summary>
+	/// If true the GA wrapper will not start sending data automatically until a UserID is specified.
+	/// </summary>
+	/// <value>
+	/// CUSTOMUSERID true/false
+	/// </value>
+	public static bool CUSTOMUSERID
+	{
+		get {
+			if (_instance != null)
+				return _instance.CustomUserID;
+			else
+				return false;
+		}
+	}
+	
 	#endregion
 	
 	#region public values
@@ -233,6 +329,9 @@ public class GA : MonoBehaviour
 	public bool IncludeSystemSpecs;
 	public bool IncludeSceneChange;
 	public bool SubmitErrors;
+	public int MaxErrorCount = 10;
+	public bool SubmitErrorStackTrace;
+	public bool SubmitErrorSystemInfo;
 	public bool SubmitFpsAverage;
 	public bool SubmitFpsCritical;
 	public int FpsCriticalThreshold = 30;
@@ -240,15 +339,20 @@ public class GA : MonoBehaviour
 	public bool ArchiveData;
 	public bool GuiEnabled;
 	public Transform TrackTarget;
+	public long ArchiveMaxFileSize = 500;
+	public bool CustomUserID;
 	
 	//These values are used for the GA_Inspector only
+	public List<HelpTypes> ClosedHints = new List<HelpTypes>();
+	public bool DisplayHints;
 	public bool QAFoldOut;
 	public bool GDFoldOut;
-	public bool BFoldOut;
-	public bool PFoldOut;
-	public bool HMFoldOut;
-	public bool MobileFoldOut;
+	public bool DataFoldOut;
 	public bool GuiFoldOut;
+	public bool ErrorFoldOut;
+	public bool GeneralFoldOut;
+	public bool EditorFoldOut;
+	public bool TrackFoldOut;
 	
 	#endregion
 	
@@ -277,7 +381,7 @@ public class GA : MonoBehaviour
 		
 		if (PublicKey.Equals("") || PrivateKey.Equals(""))
 		{
-			Debug.LogError("GA Error: Public key and/or private key not set. Closing GA.");
+			Debug.LogWarning("GA Error: Public key and/or private key not set. Closing GA.");
 			Destroy(gameObject);
 			return;
 		}
@@ -298,9 +402,14 @@ public class GA : MonoBehaviour
 		
 		Application.RegisterLogCallback(GA_Debug.HandleLog);
 		
+		if (DebugMode)
+		{
+			Debug.Log("GA Wrapper initialized, waiting for events..");
+		}
+		
 		if (IncludeSystemSpecs)
 		{
-			List<Dictionary<string, object>> systemspecs = GA_GenericInfo.GetGenericInfo();
+			List<Dictionary<string, object>> systemspecs = GA_GenericInfo.GetGenericInfo("");
 			
 			foreach (Dictionary<string, object> spec in systemspecs)
 			{
@@ -309,7 +418,8 @@ public class GA : MonoBehaviour
 		}
 		
 		//Start the submit queue for sending messages to the server
-		RunCoroutine(GA_Queue.SubmitQueue());
+		if (!CustomUserID && GA_GenericInfo.UserID != string.Empty)
+			RunCoroutine(GA_Queue.SubmitQueue());
 		
 		//If we're playing the unity demo "AngryBots", then add the GA_AngryBots component
 		if (Application.loadedLevelName == "AngryBots")
@@ -336,7 +446,7 @@ public class GA : MonoBehaviour
 	{
 		if (_instance == null)
 		{
-			Debug.LogError("GA Error: No GA instance exists. Drag the GA game object into your scene.");
+			Debug.LogWarning("GA Error: No GA instance exists. Drag the GA game object into your scene.");
 			return null;
 		}
 		
@@ -355,7 +465,7 @@ public class GA : MonoBehaviour
 		
 		try
 		{
-			System.Net.Sockets.TcpClient clnt= new System.Net.Sockets.TcpClient("www.google.com", 80);
+			System.Net.Sockets.TcpClient clnt = new System.Net.Sockets.TcpClient("www.gameanalytics.com", 80);
 			clnt.Close();
 			return true;
 		}
@@ -377,6 +487,57 @@ public class GA : MonoBehaviour
 		}
 		
 		#endif
+	}
+	
+	/// <summary>
+	/// Sets a custom user ID.
+	/// Make sure each user has a unique user ID. This is useful if you have your own log-in system with unique user IDs.
+	/// NOTE: Only use this method if you have enabled "Custom User ID" on the GA inspector!
+	/// </summary>
+	/// <param name="customID">
+	/// The custom user ID - this should be unique for each user
+	/// </param>
+	public static void SetCustomUserID(string customID)
+	{
+		if (customID != string.Empty)
+		{
+			GA_GenericInfo.SetCustomUserID(customID);
+			
+			RunCoroutine(GA_Queue.SubmitQueue());
+		}
+	}
+	
+	public HelpInfo GetHelpMessage()
+	{
+		if (PublicKey.Equals("") || PrivateKey.Equals(""))
+		{
+			return new HelpInfo() { Message = "Please fill in your Game Key and Secret Key, obtained from the Game Analytics website where you created your game.", MsgType = MessageTypes.Warning, HelpType = HelpTypes.None };
+		}
+		else if (Build.Equals(""))
+		{
+			return new HelpInfo() { Message = "Please fill in a name for your build, representing the current version of the game. Updating the build name for each version of the game will allow you to filter by build when viewing your data on the GA website.", MsgType = MessageTypes.Warning, HelpType = HelpTypes.None };
+		}
+		else if (SubmitFpsCritical && TrackTarget == null && !ClosedHints.Contains(HelpTypes.FpsCriticalAndTrackTargetHelp))
+		{
+			return new HelpInfo() { Message = "You have chosen to track critical FPS, but you have not added a Track Target. Adding a Track Target will help you identify the location of critical FPS events, as the Track Target's coordinates are submitted with the event.", MsgType = MessageTypes.Info, HelpType = HelpTypes.FpsCriticalAndTrackTargetHelp };
+		}
+		else if (GuiEnabled && TrackTarget == null && !ClosedHints.Contains(HelpTypes.GuiAndTrackTargetHelp))
+		{
+			return new HelpInfo() { Message = "You have chosen to enable the Feedback GUI, but you have not added a Track Target. Adding a Track Target will help you identify the location of player feedback, as the Track Target's coordinates are submitted with the event.", MsgType = MessageTypes.Info, HelpType = HelpTypes.GuiAndTrackTargetHelp };
+		}
+		else if (CustomUserID && !ClosedHints.Contains(HelpTypes.ProvideCustomUserID))
+		{
+			return new HelpInfo() { Message = "You have indicated that you will provide a custom user ID - no data will be submitted until it is provided.", MsgType = MessageTypes.Info, HelpType = HelpTypes.ProvideCustomUserID };
+		}
+		
+		#if !UNITY_IPHONE
+		if (!IncludeSystemSpecs && !ClosedHints.Contains(HelpTypes.IncludeSystemSpecsHelp))
+		{
+			return new HelpInfo() { Message = "If you are having trouble identifying the hardware of users with performance issues you might want to enable Submit System Info under the Quality Assurance tab. This way detailed system information will be submitted at the beginning of each play session.", MsgType = MessageTypes.Info, HelpType = HelpTypes.IncludeSystemSpecsHelp };
+		}
+		#endif
+		
+		return new HelpInfo() { Message = "No hints to display", MsgType = MessageTypes.None, HelpType = HelpTypes.None };
 	}
 	
 	#endregion

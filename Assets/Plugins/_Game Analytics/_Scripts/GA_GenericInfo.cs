@@ -7,13 +7,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System;
+using System.Net;
+
+#if !UNITY_WEBPLAYER && !UNITY_ANDROID
+using System.Net.NetworkInformation;
+#endif
 
 public static class GA_GenericInfo
 {
-	//[iOS only] Uncomment the lines below if the xcode script for OpenUDID is implemented
-	//[DllImport ("__Internal")]
-	//private static extern string FunctionGetOpenUDID ();
-	
 	#region public values
 	
 	/// <summary>
@@ -22,7 +23,7 @@ public static class GA_GenericInfo
 	public static string UserID
 	{
 		get {
-			if (_userID == null)
+			if (_userID == null && !GA.CUSTOMUSERID)
 			{
 				if (PlayerPrefs.HasKey("GA_uid"))
 				{
@@ -30,7 +31,7 @@ public static class GA_GenericInfo
 				}
 				else
 				{
-					_userID = GetUUID(true);
+					_userID = GetUserUUID();
 					PlayerPrefs.SetString("GA_uid", _userID);
 					PlayerPrefs.Save();
 				}
@@ -47,7 +48,7 @@ public static class GA_GenericInfo
 		get {
 			if (_sessionID == null)
 			{
-				_sessionID = GetUUID(false);
+				_sessionID = GetSessionUUID();
 			}
 			return _sessionID;
 		}
@@ -69,6 +70,7 @@ public static class GA_GenericInfo
 	
 	private static string _userID;
 	private static string _sessionID;
+	private static bool _settingUserID;
 	
 	#endregion
 	
@@ -83,7 +85,7 @@ public static class GA_GenericInfo
 	/// <returns>
 	/// The message to submit to the GA server is a dictionary of all the relevant parameters (containing user ID, session ID, system information, language information, date/time, build version) <see cref="Dictionary<System.String, System.Object>"/>
 	/// </returns>
-	public static List<Dictionary<string, object>> GetGenericInfo()
+	public static List<Dictionary<string, object>> GetGenericInfo(string root)
 	{
 		List<Dictionary<string, object>> systemspecs = new List<Dictionary<string, object>>();
 		
@@ -95,12 +97,13 @@ public static class GA_GenericInfo
 		
 		#if !UNITY_IPHONE
 		
-		systemspecs.Add(AddSystemSpecs("os", SystemInfo.operatingSystem));
-		systemspecs.Add(AddSystemSpecs("processor_type", SystemInfo.processorType));
-		systemspecs.Add(AddSystemSpecs("gfx_name", SystemInfo.graphicsDeviceName));
-		systemspecs.Add(AddSystemSpecs("gfx_version", SystemInfo.graphicsDeviceVersion));
+		systemspecs.Add(AddSystemSpecs("unity_wrapper", GA.VERSION, root));
+		systemspecs.Add(AddSystemSpecs("os", SystemInfo.operatingSystem, root));
+		systemspecs.Add(AddSystemSpecs("processor_type", SystemInfo.processorType, root));
+		systemspecs.Add(AddSystemSpecs("gfx_name", SystemInfo.graphicsDeviceName, root));
+		systemspecs.Add(AddSystemSpecs("gfx_version", SystemInfo.graphicsDeviceVersion, root));
 		
-		// Unity provides lots of additional system info which might be worth tracking for some:
+		// Unity provides lots of additional system info which might be worth tracking for some games:
 		//systemspecs.Add(AddSystemSpecs("process_count", SystemInfo.processorCount.ToString()));
 		//systemspecs.Add(AddSystemSpecs("sys_mem_size", SystemInfo.systemMemorySize.ToString()));
 		//systemspecs.Add(AddSystemSpecs("gfx_mem_size", SystemInfo.graphicsMemorySize.ToString()));
@@ -123,36 +126,64 @@ public static class GA_GenericInfo
 	}
 	
 	/// <summary>
-	/// Gets a universally unique ID.
+	/// Gets a universally unique ID to represent the user. User ID should be device specific to allow tracking across different games on the same device:
+	/// -- Android uses the android device ID.
+	/// -- iOS/PC/Mac uses the first MAC addresses available.
+	/// -- Webplayer uses ?
+	/// Note: The unique user ID follows the ODIN specifications. See http://code.google.com/p/odinmobile/ for more information on ODIN.
 	/// </summary>
 	/// <returns>
 	/// The generated UUID <see cref="System.String"/>
 	/// </returns>
-	public static string GetUUID(bool isUserID)
+	public static string GetUserUUID()
 	{
-		if (isUserID)
-		{
-			#if UNITY_IPHONE
-			if (Application.platform == RuntimePlatform.IPhonePlayer)
-			{
-				try
-				{
-					//[iOS only] Uncomment the line below if the xcode script for OpenUDID is implemented
-					//return FunctionGetOpenUDID();
-				}
-				catch (Exception)
-				{
-					//The xcode script for OpenUDID is not implemented correctly, so we just continue and get the GUID instead 
-				}
-			}
-			#endif
-			
-			#if UNITY_ANDROID
-			return SystemInfo.deviceUniqueIdentifier;
-			#endif
-		}
+		#if UNITY_ANDROID
 		
+		return SystemInfo.deviceUniqueIdentifier;
+		
+		#elif UNITY_WEBPLAYER
+		
+		return SystemInfo.deviceUniqueIdentifier;
+		
+		#else
+		
+		NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
+		string mac = "";
+
+        foreach (NetworkInterface adapter in nics)
+        {
+        	PhysicalAddress address = adapter.GetPhysicalAddress();
+			if (address.ToString() != "" && mac == "")
+			{
+				byte[] bytes = address.GetAddressBytes();
+				mac = GA_Submit.CreateSha1Hash(bytes);
+			}
+		}
+		return mac;
+		
+		#endif
+	}
+	
+	/// <summary>
+	/// Gets a universally unique ID to represent the session.
+	/// </summary>
+	/// <returns>
+	/// The generated UUID <see cref="System.String"/>
+	/// </returns>
+	public static string GetSessionUUID()
+	{
 		return Guid.NewGuid().ToString();
+	}
+	
+	/// <summary>
+	/// Do not call this method (instead use GA.SetCustomUserID)! Only the GA class should call this method.
+	/// </summary>
+	/// <param name="customID">
+	/// The custom user ID - this should be unique for each user
+	/// </param>
+	public static void SetCustomUserID(string customID)
+	{
+		_userID = customID;
 	}
 	
 	#endregion
@@ -165,11 +196,15 @@ public static class GA_GenericInfo
 	/// <param name="parameters">
 	/// The parameters which will be sent to the server <see cref="Dictionary<System.String, System.Object>"/>
 	/// </param>
-	private static Dictionary<string, object> AddSystemSpecs(string key, string type)
+	private static Dictionary<string, object> AddSystemSpecs(string key, string type, string root)
 	{
+		string addRoot = "";
+		if (root != "")
+			addRoot = root + ":";
+		
 		Dictionary<string, object> parameters = new Dictionary<string, object>()
 		{
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], "system:" + key },
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], addRoot + "system:" + key },
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message], type }
 		};
 		

@@ -32,9 +32,12 @@ public static class GA_Archive
 		
 		if (File.Exists(fileName))
 		{
-			fileWriter = File.AppendText(fileName);
+			if (new FileInfo(fileName).Length + System.Text.ASCIIEncoding.Unicode.GetByteCount(json) <= GA.ARCHIVEMAXFILESIZE)
+			{
+				fileWriter = File.AppendText(fileName);
+			}
 		}
-		else
+		else if (System.Text.ASCIIEncoding.Unicode.GetByteCount(json) <= GA.ARCHIVEMAXFILESIZE)
 		{
 			fileWriter = File.CreateText(fileName);
 		}

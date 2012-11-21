@@ -88,7 +88,7 @@ public static class GA_Submit
 	{			
 		if (_publicKey.Equals("") || _privateKey.Equals(""))
 		{
-			Debug.LogError("GA Error: Public key and/or private key not set. Use GASubmit.SetupKeys(publicKey, privateKey) to set keys.");
+			Debug.LogWarning("GA Error: Public key and/or private key not set. Use GASubmit.SetupKeys(publicKey, privateKey) to set keys.");
 			return;
 		}
 		
@@ -191,13 +191,20 @@ public static class GA_Submit
 		{
 			if (serviceType != items[i].Type)
 			{
-				Debug.LogError("GA Error: All messages in a submit must be of the same service/category type.");
+				Debug.LogWarning("GA Error: All messages in a submit must be of the same service/category type.");
 				if (errorEvent != null)
 				{
 					errorEvent(items);
 				}
 				yield break;
 			}
+			
+			// if user ID is missing from the item add it now (could f.x. happen if custom user id is enabled,
+			// and the item was added before the custom user id was provided)
+			if (!items[i].Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]))
+				items[i].Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID], GA_GenericInfo.UserID);
+			else if (items[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]] == null)
+				items[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]] = GA_GenericInfo.UserID;
 			
 			if (items[i].Count > 1)
 			{
@@ -247,7 +254,7 @@ public static class GA_Submit
 		
 		//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
 		Hashtable headers = new Hashtable();
-		headers.Add("Authorization", CreateMD5Hash(json));
+		headers.Add("Authorization", CreateMD5Hash(json + _privateKey));
 		
 		//Try to send the data
 		WWW www = new WWW(url, data, headers);
@@ -259,12 +266,12 @@ public static class GA_Submit
 		{
 			Debug.Log("GA URL: " + url);
 			Debug.Log("GA Submit: " + json);
-			Debug.Log("GA Hash: " + CreateMD5Hash(json));
+			Debug.Log("GA Hash: " + CreateMD5Hash(json + _privateKey));
 		}
 		
 		try
 		{
-			if (www.error != null)
+			if (www.error != null && !CheckServerReply(www))
 			{
 				throw new Exception(www.error);
 			}
@@ -273,8 +280,9 @@ public static class GA_Submit
 			Dictionary<string, object> returnParam = JsonMapper.ToObject<Dictionary<string, object>>(www.text);
 			
 			//If the response contains the key "status" with the value "ok" we know that the message was sent and recieved successfully
-			if (returnParam != null &&
-			    returnParam.ContainsKey("status") && returnParam["status"].ToString().Equals("ok"))
+			if ((returnParam != null &&
+			    returnParam.ContainsKey("status") && returnParam["status"].ToString().Equals("ok")) ||
+				CheckServerReply(www))
 			{
 				if (GA.DEBUG)
 				{
@@ -295,11 +303,7 @@ public static class GA_Submit
 				    returnParam.ContainsKey("message") && returnParam["message"].ToString().Equals("Game not found") &&
 					returnParam.ContainsKey("code") && returnParam["code"].ToString().Equals("400"))
 				{
-					//If it was not a QA message, or we are not re-submitting errors, we give an error, otherwise just a warning (errors will be picked up and re-submitted automatically, and we don't want to loop that behavior)
-					if (serviceType != CategoryType.GA_Log || !GA.SUBMITERRORS)
-						Debug.LogError("GA Error: " + www.text + " (NOTE: make sure your public and private keys match the keys you recieved from the Game Analytics website. It might take a few minutes before a newly added game will be able to recieve data.)");
-					else
-						Debug.LogWarning("GA Error: " + www.text + " (NOTE: make sure your public and private keys match the keys you recieved from the Game Analytics website. It might take a few minutes before a newly added game will be able to recieve data.)");
+					Debug.LogWarning("GA Error: " + www.text + " (NOTE: make sure your public and private keys match the keys you recieved from the Game Analytics website. It might take a few minutes before a newly added game will be able to recieve data.)");
 					
 					//An error event with a null parameter will stop the GA wrapper from submitting messages
 					if (errorEvent != null)
@@ -309,11 +313,7 @@ public static class GA_Submit
 				}
 				else
 				{
-					//If it was not a QA message, or we are not re-submitting errors, we give an error, otherwise just a warning (errors will be picked up and re-submitted automatically, and we don't want to loop that behavior)
-					if (serviceType != CategoryType.GA_Log || !GA.SUBMITERRORS)
-						Debug.LogError("GA Error: " + www.text);
-					else
-						Debug.LogWarning("GA Error: " + www.text);
+					Debug.LogWarning("GA Error: " + www.text);
 					
 					if (errorEvent != null)
 					{
@@ -324,11 +324,7 @@ public static class GA_Submit
 		}
 		catch (Exception e)
 		{
-			//If it was not a QA message, or we are not re-submitting errors, we give an error, otherwise just a warning (errors will be picked up and re-submitted automatically, and we don't want to loop that behavior)
-			if (serviceType != CategoryType.GA_Log || !GA.SUBMITERRORS)
-				Debug.LogError("GA Error: " + e.Message);
-			else
-				Debug.LogWarning("GA Error: " + e.Message);
+			Debug.LogWarning("GA Error: " + e.Message);
 			
 			/* If we hit one of these errors we should not attempt to send the message again
 			 * (if necessary we already threw a GA Error which may be tracked) */
@@ -382,27 +378,122 @@ public static class GA_Submit
 	}
 	
 	/// <summary>
-	/// Encodes the input (json message) and the users private key as a MD5 hash
+	/// Encodes the input as a MD5 hash
 	/// </summary>
 	/// <param name="input">
-	/// The input message we want encoded <see cref="System.String"/>
+	/// The input we want encoded <see cref="System.String"/>
 	/// </param>
 	/// <returns>
-	/// The MD5 hash encoded result of input + private key <see cref="System.String"/>
+	/// The MD5 hash encoded result of input <see cref="System.String"/>
 	/// </returns>
 	public static string CreateMD5Hash(string input)
 	{
-		// Gets the MD5 hash for input and _privateKey
+		// Gets the MD5 hash for input
 		MD5 md5 = new MD5CryptoServiceProvider();
-		byte[] data = Encoding.Default.GetBytes(input + _privateKey);
+		byte[] data = Encoding.Default.GetBytes(input);
 		byte[] hash = md5.ComputeHash(data);
 		// Transforms as hexa
 		string hexaHash = "";
 		foreach (byte b in hash) {
 			hexaHash += String.Format("{0:x2}", b);
 		}
-		// Returns MD5 hexa hash
+		// Returns MD5 hexa hash as string
 		return hexaHash;
+	}
+	
+	/// <summary>
+	/// Encodes the input as a MD5 hash
+	/// </summary>
+	/// <param name="input">
+	/// The input we want encoded <see cref="System.String"/>
+	/// </param>
+	/// <returns>
+	/// The MD5 hash encoded result of input <see cref="System.String"/>
+	/// </returns>
+	public static string CreateMD5Hash(byte[] input)
+	{
+		// Gets the MD5 hash for input
+		MD5 md5 = new MD5CryptoServiceProvider();
+		byte[] hash = md5.ComputeHash(input);
+		// Transforms as hexa
+		string hexaHash = "";
+		foreach (byte b in hash) {
+			hexaHash += String.Format("{0:x2}", b);
+		}
+		// Returns MD5 hexa hash as string
+		return hexaHash;
+	}
+	
+	/// <summary>
+	/// Encodes the input as a sha1 hash
+	/// </summary>
+	/// <param name="input">
+	/// The input we want to encoded <see cref="System.String"/>
+	/// </param>
+	/// <returns>
+	/// The sha1 hash encoded result of input <see cref="System.String"/>
+	/// </returns>
+	public static string CreateSha1Hash(string input)
+	{
+		// Gets the sha1 hash for input
+		SHA1 sha1 = new SHA1CryptoServiceProvider();
+		byte[] data = Encoding.Default.GetBytes(input);
+		byte[] hash = sha1.ComputeHash(data);
+		// Returns sha1 hash as string
+		return Convert.ToBase64String(hash);
+	}
+	
+	/// <summary>
+	/// Encodes the input as a sha1 hash
+	/// </summary>
+	/// <param name="input">
+	/// The input we want to encoded
+	/// </param>
+	/// <returns>
+	/// The sha1 hash encoded result of input <see cref="System.String"/>
+	/// </returns>
+	public static string CreateSha1Hash(byte[] input)
+	{
+		// Gets the sha1 hash for input
+		SHA1 sha1 = new SHA1CryptoServiceProvider();
+		byte[] hash = sha1.ComputeHash(input);
+		// Returns sha1 hash as string
+		return Convert.ToBase64String(hash);
+	}
+	
+	public static string GetPrivateKey()
+	{
+		return _privateKey;
+	}
+	
+	#endregion
+	
+	#region private methods
+	
+	/// <summary>
+	/// Check if a reply from the server was accepted. All response codes from 200 to 299 are accepted.
+	/// </summary>
+	/// <param name="www">
+	/// The www object which contains response headers
+	/// </param>
+	/// <returns>
+	/// Return true if response code is from 200 to 299. Otherwise returns false.
+	/// </returns>
+	private static bool CheckServerReply(WWW www)
+	{
+		string status = www.responseHeaders["STATUS"];
+		
+		string[] splitStatus = status.Split(' ');
+		
+		int responseCode;
+		
+		if (splitStatus.Length > 1 && int.TryParse(splitStatus[1], out responseCode))
+		{
+			if (responseCode >= 200 && responseCode < 300)
+				return true;
+		}
+		
+		return false;
 	}
 	
 	#endregion
