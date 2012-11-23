@@ -171,18 +171,7 @@ public static class GA_Queue
 			}
 		}
 		
-		//If we have something to submit and we have not stopped submitting completely then we start submitting data
-		if (_queue.Count > 0 && !_submittingData && !_endsubmit)
-		{
-			_submittingData = true;
-		
-			if (GA.DEBUG)
-			{
-				Debug.Log("GA: Queue submit started");
-			}
-			
-			GA_Submit.SubmitQueue(_queue, Submitted, SubmitError);
-		}
+		ForceSubmit();
 		
 		//Wait for the next timer interval before we try to submit again
 		yield return new WaitForSeconds(TIMER);
@@ -194,6 +183,25 @@ public static class GA_Queue
 			GA.INSTANCE.GetComponent<GA_SpecialEvents>().SubmitCriticalFPS();
 			
 			GA.RunCoroutine(SubmitQueue());
+		}
+	}
+	
+	/// <summary>
+	/// Submit any queued up data immediately. Useful when you want to control when data is submitted.
+	/// </summary>
+	public static void ForceSubmit()
+	{
+		//If we have something to submit and we have not stopped submitting completely then we start submitting data
+		if (_queue.Count > 0 && !_submittingData && !_endsubmit)
+		{
+			_submittingData = true;
+		
+			if (GA.DEBUG)
+			{
+				Debug.Log("GA: Queue submit started");
+			}
+			
+			GA_Submit.SubmitQueue(_queue, Submitted, SubmitError);
 		}
 	}
 	
