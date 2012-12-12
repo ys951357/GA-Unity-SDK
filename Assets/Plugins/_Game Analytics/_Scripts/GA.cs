@@ -30,7 +30,7 @@ public class GA : MonoBehaviour
 	/// <summary>
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
-	public static string VERSION = "0.2.1";
+	public static string VERSION = "0.2.2";
 	
 	/// <summary>
 	/// Gets the instance
@@ -317,6 +317,22 @@ public class GA : MonoBehaviour
 		}
 	}
 	
+	/// <summary>
+	/// If true the GA wrapper has found an internet connection.
+	/// </summary>
+	/// <value>
+	/// INTERNETCONNECTIVITY true/false
+	/// </value>
+	public static bool INTERNETCONNECTIVITY
+	{
+		get {
+			if (_instance != null)
+				return _instance.InternetConnectivity;
+			else
+				return false;
+		}
+	}
+	
 	#endregion
 	
 	#region public values
@@ -341,6 +357,8 @@ public class GA : MonoBehaviour
 	public Transform TrackTarget;
 	public long ArchiveMaxFileSize = 500;
 	public bool CustomUserID;
+	
+	public bool InternetConnectivity;
 	
 	//These values are used for the GA_Inspector only
 	public List<HelpTypes> ClosedHints = new List<HelpTypes>();
@@ -402,11 +420,17 @@ public class GA : MonoBehaviour
 		
 		Application.RegisterLogCallback(GA_Debug.HandleLog);
 		
+		CheckInternetConnectivity();
+		
 		if (DebugMode)
 		{
-			Debug.Log("GA Wrapper initialized, waiting for events..");
+			if (InternetConnectivity)
+				Debug.Log("GA Wrapper initialized, waiting for events..");
+			else
+				Debug.Log("GA Wrapper detects no internet connection..");
 		}
 		
+		// Add system specs to the submit queue
 		if (IncludeSystemSpecs)
 		{
 			List<Dictionary<string, object>> systemspecs = GA_GenericInfo.GetGenericInfo("");
@@ -454,12 +478,9 @@ public class GA : MonoBehaviour
 	}
 	
 	/// <summary>
-	/// Checks the internet connectivity.
+	/// Checks the internet connectivity, and sets INTERNETCONNECTIVITY
 	/// </summary>
-	/// <returns>
-	/// True if the device is connected to the internet, otherwise false.
-	/// </returns>
-	public static bool CheckInternetConnectivity()
+	public static void CheckInternetConnectivity()
 	{
 		#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN
 		
@@ -467,11 +488,11 @@ public class GA : MonoBehaviour
 		{
 			System.Net.Sockets.TcpClient clnt = new System.Net.Sockets.TcpClient("www.gameanalytics.com", 80);
 			clnt.Close();
-			return true;
+			INSTANCE.InternetConnectivity = true;
 		}
 		catch(System.Exception)
 		{
-			return false;
+			INSTANCE.InternetConnectivity = false;
 		}
 		
 		#else
@@ -479,11 +500,11 @@ public class GA : MonoBehaviour
 		if  (Application.internetReachability == NetworkReachability.ReachableViaLocalAreaNetwork || 
 			(Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork && ALLOWROAMING))
 		{
-			return true;
+			INSTANCE.InternetConnectivity = true;
 		}
 		else
 		{
-			return false;
+			INSTANCE.InternetConnectivity = false;
 		}
 		
 		#endif
@@ -507,6 +528,12 @@ public class GA : MonoBehaviour
 		}
 	}
 	
+	/// <summary>
+	/// Help/hints/tips messages used for the GA inspector hints box. This function decides which hint to display.
+	/// </summary>
+	/// <returns>
+	/// The help message.
+	/// </returns>
 	public HelpInfo GetHelpMessage()
 	{
 		if (PublicKey.Equals("") || PrivateKey.Equals(""))
@@ -537,7 +564,7 @@ public class GA : MonoBehaviour
 		}
 		#endif
 		
-		return new HelpInfo() { Message = "No hints to display", MsgType = MessageTypes.None, HelpType = HelpTypes.None };
+		return new HelpInfo() { Message = "No hints to display. The \"Reset Hints\" button resets closed hints.", MsgType = MessageTypes.None, HelpType = HelpTypes.None };
 	}
 	
 	#endregion

@@ -89,7 +89,7 @@ public class GA_SpecialEvents : MonoBehaviour
 	
 	public void SubmitCriticalFPS()
 	{
-		//average FPS
+		//critical FPS
 		if (GA.SUBMITCRITICALFPS)
 		{
 			float timeSinceUpdate = Time.time - _lastUpdateCrit;

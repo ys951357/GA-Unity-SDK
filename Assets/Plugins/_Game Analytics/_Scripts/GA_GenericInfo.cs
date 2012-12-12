@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System;
 using System.Net;
 
-#if !UNITY_WEBPLAYER && !UNITY_ANDROID
+#if !UNITY_WEBPLAYER
 using System.Net.NetworkInformation;
 #endif
 
@@ -127,10 +127,10 @@ public static class GA_GenericInfo
 	
 	/// <summary>
 	/// Gets a universally unique ID to represent the user. User ID should be device specific to allow tracking across different games on the same device:
-	/// -- Android uses the android device ID.
+	/// -- Android uses deviceUniqueIdentifier.
 	/// -- iOS/PC/Mac uses the first MAC addresses available.
-	/// -- Webplayer uses ?
-	/// Note: The unique user ID follows the ODIN specifications. See http://code.google.com/p/odinmobile/ for more information on ODIN.
+	/// -- Webplayer uses deviceUniqueIdentifier.
+	/// Note: The unique user ID is based on the ODIN specifications. See http://code.google.com/p/odinmobile/ for more information on ODIN.
 	/// </summary>
 	/// <returns>
 	/// The generated UUID <see cref="System.String"/>

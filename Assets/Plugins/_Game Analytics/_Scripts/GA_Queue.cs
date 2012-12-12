@@ -116,28 +116,6 @@ public static class GA_Queue
 		}
 	}
 	
-	private static void StackQueue(List<GA_Submit.Item> queue, GA_Submit.Item item)
-	{
-		bool stacked = false;
-		for (int i = 0; i < queue.Count; i++)
-		{
-			if (queue[i].Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]) &&
-				item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]) &&
-				queue[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]].Equals(item.Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]]) &&
-				queue[i].Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]) &&
-				item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]) &&
-				queue[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]].Equals(item.Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]]))
-			{
-				stacked = true;
-				queue[i] = new GA_Submit.Item { AddTime = queue[i].AddTime, Parameters = queue[i].Parameters, Type = queue[i].Type, Count = queue[i].Count + 1 };
-			}
-		}
-		if (!stacked)
-		{
-			queue.Add(item);
-		}
-	}
-	
 	/// <summary>
 	/// At every timer interval we submit the next batch of messages to the GA server
 	/// </summary>
@@ -153,7 +131,7 @@ public static class GA_Queue
 		}
 		
 		//If we have internet connection then add any archived data to the submit queue
-		if (GA.ARCHIVEDATA && GA.CheckInternetConnectivity())
+		if (GA.ARCHIVEDATA && GA.INTERNETCONNECTIVITY)
 		{
 			List<GA_Submit.Item> archivedItems = GA_Archive.GetArchivedData();
 			
@@ -208,6 +186,38 @@ public static class GA_Queue
 	#endregion
 	
 	#region private methods
+	
+	/// <summary>
+	/// If we already have the same message item in the queue we simply increase the message count instead of adding a duplicate.
+	/// </summary>
+	/// <param name='queue'>
+	/// Queue.
+	/// </param>
+	/// <param name='item'>
+	/// Item.
+	/// </param>
+	private static void StackQueue(List<GA_Submit.Item> queue, GA_Submit.Item item)
+	{
+		bool stacked = false;
+		for (int i = 0; i < queue.Count; i++)
+		{
+			if (!stacked &&
+				queue[i].Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]) &&
+				item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]) &&
+				queue[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]].Equals(item.Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID]]) &&
+				queue[i].Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]) &&
+				item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]) &&
+				queue[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]].Equals(item.Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]]))
+			{
+				stacked = true;
+				queue[i] = new GA_Submit.Item { AddTime = queue[i].AddTime, Parameters = queue[i].Parameters, Type = queue[i].Type, Count = Mathf.Max(2, queue[i].Count + 1) };
+			}
+		}
+		if (!stacked)
+		{
+			queue.Add(item);
+		}
+	}
 	
 	/// <summary>
 	/// This is called once for every successful message submitted. We count the number of messages submitted and when
@@ -268,6 +278,11 @@ public static class GA_Queue
 			
 			_endsubmit = true;
 			return;
+		}
+		else
+		{
+			// Check to see if we have access to a network connection - if this is the cause of the error future submits will take it into account
+			GA.CheckInternetConnectivity();
 		}
 		
 		_errorQueue.AddRange(items);

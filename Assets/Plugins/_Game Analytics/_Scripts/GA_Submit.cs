@@ -206,15 +206,26 @@ public static class GA_Submit
 			else if (items[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]] == null)
 				items[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]] = GA_GenericInfo.UserID;
 			
+			Dictionary<string, object> parameters;
+			
 			if (items[i].Count > 1)
 			{
-				if (items[i].Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]))
+				parameters = new Dictionary<string, object>();
+				foreach (KeyValuePair<string, object> kvp in items[i].Parameters)
 				{
-					items[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]] = items[i].Count + "x " + items[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]].ToString();
+					parameters.Add(kvp.Key, kvp.Value);
+				}
+				
+				if (parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]))
+				{
+					parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]] = items[i].Count + "x " + parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message]].ToString();
 				}
 			}
+			else
+			{
+				parameters = items[i].Parameters;
+			}
 			
-			Dictionary<string, object> parameters = items[i].Parameters;
 			itemsParameters.Add(parameters);
 		}
 		
@@ -223,9 +234,7 @@ public static class GA_Submit
 		
 		/* If we do not have access to a network connection (or we are roaming (mobile devices) and GA.ALLOWROAMING is false),
 		 * and data is set to be archived, then archive the data and pretend the message was sent successfully */
-		bool internetConnectivity = GA.CheckInternetConnectivity();
-		
-		if  (GA.ARCHIVEDATA && !internetConnectivity)
+		if  (GA.ARCHIVEDATA && !GA.INTERNETCONNECTIVITY)
 		{
 			if (GA.DEBUG)
 			{
@@ -239,7 +248,7 @@ public static class GA_Submit
 			}
 			yield break;
 		}
-		else if (!internetConnectivity)
+		else if (!GA.INTERNETCONNECTIVITY)
 		{
 			Debug.LogWarning("GA Error: No network connection.");
 			if (errorEvent != null)

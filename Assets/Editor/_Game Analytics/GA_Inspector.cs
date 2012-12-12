@@ -16,7 +16,7 @@ public class GA_Inspector : Editor
 	private GUIContent _checkForUpdates			= new GUIContent("Updates", "Checks if you have the newest version of the Game Analytics Unity3D wrapper.");
 	private GUIContent _publicKeyLabel			= new GUIContent("Game Key", "Your Game Analytics public key - copy/paste from the GA website.");
 	private GUIContent _privateKeyLabel			= new GUIContent("Secret Key", "Your Game Analytics private key - copy/paste from the GA website.");
-	private GUIContent _closeHint				= new GUIContent("-", "Closes the current hint. This hint will not be displayed again.");
+	private GUIContent _closeHint				= new GUIContent("-", "Closes the current hint. This hint will not be displayed again. The \"Reset Hints\" button, in the Editor submenu below, will reset all closed hints so they will appear again.");
 	private GUIContent _resetHints				= new GUIContent("Reset Hints", "Reset all closed hints so they will appear again.");
 	private GUIContent _build					= new GUIContent("Build", "The current version of the game. Updating the build name for each test version of the game will allow you to filter by build when viewing your data on the GA website.");
 	private GUIContent _displayHints			= new GUIContent("Display Hints", "Displays a box with hints, tips, and warnings at the top of the GA inspector.");

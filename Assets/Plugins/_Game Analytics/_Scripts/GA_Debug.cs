@@ -18,7 +18,7 @@ public static class GA_Debug
 	/// If SubmitErrors is enabled on the GA object this makes sure that any exceptions or errors are submitted to the GA server
 	/// </summary>
 	/// <param name="logString">
-	/// Contains both a message and an exception identifier, so we split it up <see cref="System.String"/>
+	/// The message <see cref="System.String"/>
 	/// </param>
 	/// <param name="stackTrace">
 	/// The exception stack trace <see cref="System.String"/>
@@ -98,7 +98,7 @@ public static class GA_Debug
 	}
 	
 	/// <summary>
-	/// Only used if GA_GUI script is added to the GA object (for testing)
+	/// Only used if GA_DebugGUI script is added to the GA object (for testing)
 	/// Deletes old messages from the GUI.
 	/// </summary>
 	/// <returns>
