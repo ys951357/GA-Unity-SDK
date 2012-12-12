@@ -1,5 +1,9 @@
 ### Recent Changes:
 
+##### v.0.2.2:
+
+- Fixed a performance issue with checking for network connectivity.
+
 ##### v.0.2.1:
 
 - Restructuring of the inspector view.
