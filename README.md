@@ -1,5 +1,16 @@
 ### Recent Changes:
 
+##### v.0.3.1:
+
+Complete revamp of the GA Unity Package, including:
+- Huge performance boost
+- Completely new structure (no longer requires a GA prefab)
+- 3D Heatmaps
+- Setup Wizard, Example game + Exampleg game tutorial
+- Status Window
+- System Tracker + Object Tracker
+- And lots more!
+
 ##### v.0.2.2:
 
 - Fixed a performance issue with checking for network connectivity.
