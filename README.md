@@ -1,3 +1,5 @@
+[Download from Unity3D Asset Store](http://u3d.as/content/game-analytics/game-analytics-unity-package)
+
 ### Recent Changes:
 
 ##### v.0.3.1:
