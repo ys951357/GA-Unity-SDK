@@ -37,7 +37,7 @@ public class GA_Status : EditorWindow
 		
 		GUILayout.Space(5);
 		
-		GUILayout.Label("Messages Sent", EditorStyles.boldLabel);
+		GUILayout.Label("Events Sent", EditorStyles.boldLabel);
 		
 		GUILayout.BeginHorizontal();
 	    GUILayout.Label("Total Succeeded:", GUILayout.Width(145));

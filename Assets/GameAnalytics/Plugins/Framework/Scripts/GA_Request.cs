@@ -87,7 +87,7 @@ public class GA_Request
 		if (startDate.HasValue && endDate.HasValue)
 		{
 			DateTime startDT = new DateTime(startDate.Value.Year, startDate.Value.Month, startDate.Value.Day, 0, 0, 0);
-			DateTime endDT = new DateTime(endDate.Value.Year, endDate.Value.Month, endDate.Value.Day, 23, 59, 59);
+			DateTime endDT = new DateTime(endDate.Value.Year, endDate.Value.Month, endDate.Value.Day, 0, 0, 0);
 			
 			requestInfo += "&start_ts=" + DateTimeToUnixTimestamp(startDT) + "&end_ts=" + DateTimeToUnixTimestamp(endDT);
 		}
@@ -111,7 +111,7 @@ public class GA_Request
 	
 	public static double DateTimeToUnixTimestamp(DateTime dateTime)
 	{
-		return (dateTime - new DateTime(1970, 1, 1).ToLocalTime()).TotalSeconds;
+		return (dateTime - new DateTime(1970, 1, 1)).TotalSeconds;
 	}
 	
 	#endregion
