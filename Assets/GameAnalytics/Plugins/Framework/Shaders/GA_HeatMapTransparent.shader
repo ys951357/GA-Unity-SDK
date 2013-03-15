@@ -3,11 +3,13 @@ Shader "Custom/GA_HeatMapTransparent"
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
-		_MaxRadius ("MaxRadius", Range(0.0,2.0)) = 1.0 
+		_MaxRadius ("MaxRadius", Range(0.0,2.0)) = 1.0
+		_ColZero ("ColZero", Color) = (1, 1, 1, .0)
 		_Cold ("Cold", Color) = (.0, .0, .9, .0)
 		_Warm ("Warm", Color) = (.9, .0, .0, .0)
 		_RangeMin ("Minimum", Range(0.0, 1.0)) = 0.0
 		_RangeWidth ("Width", Range(0.0, 1.0)) = 1.0
+		_RangeZero ("Zero", Range(0.0, 1.0)) = 0.0
 	} 
 	
 	SubShader 
@@ -32,11 +34,13 @@ Shader "Custom/GA_HeatMapTransparent"
 		    #pragma vertex vert
 		    #pragma fragment frag
 			
+			float4 _ColZero; 
 			float4 _Cold;  
 			float4 _Warm; 
 			float _MaxRadius;
 			float _RangeMin;
 			float _RangeWidth;
+			float _RangeZero;
 			
 			float4 _MainTex_ST;
 		 
@@ -76,10 +80,33 @@ Shader "Custom/GA_HeatMapTransparent"
 				float RangeMax = _RangeMin + _RangeWidth;
 				if(radius >= _RangeMin && radius <= RangeMax )
 				{
-					radius -= _RangeMin;
-					radius /= (RangeMax - _RangeMin);
-					col = radius * _Warm + (1.0-radius)*_Cold;
-					col.a *= cos(max(r*3.14, 0.0));
+					if (_RangeZero > 0)
+					{
+						if (radius <= _RangeZero)
+						{
+							radius -= _RangeMin;
+							radius /= (RangeMax - _RangeMin);
+							float newNorm = radius / _RangeZero;
+							col = newNorm * _ColZero + (1.0-newNorm)*_Cold;
+							col.a *= cos(max(r*3.14, 0.0));
+						}
+						else
+						{
+							radius -= _RangeMin;
+							radius /= (RangeMax - _RangeMin);
+							float newNorm = _RangeZero / radius;
+							newNorm = newNorm;
+							col = newNorm * _ColZero + (1.0-newNorm)*_Warm;
+							col.a *= cos(max(r*3.14, 0.0));
+						}
+					}
+					else
+					{
+						radius -= _RangeMin;
+						radius /= (RangeMax - _RangeMin);
+						col = radius * _Warm + (1.0-radius)*_Cold;
+						col.a *= cos(max(r*3.14, 0.0));
+					}
 				}
 				return col;
 			}

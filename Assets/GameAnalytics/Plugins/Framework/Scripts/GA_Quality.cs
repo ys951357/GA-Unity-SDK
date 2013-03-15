@@ -11,27 +11,37 @@ public class GA_Quality
 {
 	#region public methods
 	
-	public  void NewEvent(string eventName, string message, Vector3 trackPosition)
+	public void NewEvent(string eventName, string message, Vector3 trackPosition)
 	{
 		CreateNewEvent(eventName, message, trackPosition.x, trackPosition.y, trackPosition.z, false);
 	}
 	
-	public  void NewEvent(string eventName, string message, float x, float y, float z)
+	public void NewEvent(string eventName, string message, float x, float y, float z)
 	{
 		CreateNewEvent(eventName, message, x, y, z, false);
 	}
 	
-	public  void NewEvent(string eventName, string message)
+	public void NewEvent(string eventName, string message)
 	{
 		CreateNewEvent(eventName, message, null, null, null, false);
 	}
 	
-	public  void NewEvent(string eventName)
+	public void NewEvent(string eventName)
 	{
 		CreateNewEvent(eventName, null, null, null, null, false);
 	}
 	
-	public  void NewErrorEvent(string eventName, string message, float x, float y, float z)
+	public void NewEvent(string eventName, Vector3 trackPosition)
+	{
+		CreateNewEvent(eventName, null, trackPosition.x, trackPosition.y, trackPosition.z, false);
+	}
+	
+	public void NewEvent(string eventName, float x, float y, float z)
+	{
+		CreateNewEvent(eventName, null, x, y, z, false);
+	}
+	
+	public void NewErrorEvent(string eventName, string message, float x, float y, float z)
 	{
 		CreateNewEvent(eventName, message, x, y, z, true);
 	}
@@ -57,7 +67,7 @@ public class GA_Quality
 		Dictionary<string, object> parameters = new Dictionary<string, object>()
 		{
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], eventName },
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], Application.loadedLevelName }
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], GA.Settings.CustomArea.Equals(string.Empty)?Application.loadedLevelName:GA.Settings.CustomArea }
 		};
 		
 		if (message != null && message.Length > 0)

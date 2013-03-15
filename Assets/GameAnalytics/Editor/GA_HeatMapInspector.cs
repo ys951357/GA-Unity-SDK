@@ -165,10 +165,29 @@ public class GA_HeatMapInspector : Editor
 		}
 		else
 		{
-			if(GUILayout.Button("Download heatmap",GUILayout.Height (30)))
+			if (heatmap.DownloadingData)
 			{
-				GA.Log("Downloading heatmap data. This might take some time..");
-				heatmap.DownloadUpdate();
+				EditorGUILayout.HelpBox("Downloading data. Please wait.",MessageType.Info);
+			}
+			else if (heatmap.BuildingHeatmap)
+			{
+				EditorGUILayout.HelpBox("Building heatmap. " + heatmap.BuildHeatmapPercentage + "%",MessageType.Info);
+			}
+			else if(GUILayout.Button("Download heatmap",GUILayout.Height (30)))
+			{
+				if (heatmap.DataContainer == null)
+				{
+					GA.Log("Downloading heatmap data. This might take some time..");
+					heatmap.DownloadUpdate();
+				}
+				else
+				{
+					GA_HeatmapCombineTypePicker combine = ScriptableObject.CreateInstance<GA_HeatmapCombineTypePicker>();
+					combine.ShowUtility();
+					Vector2 pos = EditorGUIUtility.GUIToScreenPoint(new Vector2(GUILayoutUtility.GetLastRect().x + 150, Event.current.mousePosition.y - 25));
+					combine.position = new Rect(pos.x, pos.y, 300, 145);
+					combine.OnPicked += HandleCombineOnPicked;
+				}
 			}
 		}
 		
@@ -188,6 +207,18 @@ public class GA_HeatMapInspector : Editor
 		EditorGUILayout.Space();
 	}
 
+	void HandleCombineOnPicked (GA_HeatmapCombineTypePicker sender)
+	{
+		sender.OnPicked -= HandleCombineOnPicked;
+		
+		GA_HeatMapDataFilter heatmap = target as GA_HeatMapDataFilter;
+		heatmap.SetCombineHeatmapType(sender.CombineType);
+		GA.Log("Downloading heatmap data. This might take some time..");
+		heatmap.DownloadUpdate();
+		
+		Repaint();
+	}
+	
 	void HandleEventsOnPicked (GA_EventPicker sender)
 	{
 		sender.OnClosed -= HandleEventsOnPicked;
@@ -197,7 +228,6 @@ public class GA_HeatMapInspector : Editor
 		heatmap.CurrentEventFlag = sender.Selected;
 		Repaint();
 	}
-	
 	
 	void HandleEndDateOnPicked (GA_DatePicker sender)
 	{
@@ -209,8 +239,8 @@ public class GA_HeatMapInspector : Editor
 		
 		sender.Close();
 		Repaint();
-		
 	}
+	
 	void HandleEndDateOnClosed (GA_DatePicker sender)
 	{
 		sender.OnPicked -= HandleStartDateOnPicked;

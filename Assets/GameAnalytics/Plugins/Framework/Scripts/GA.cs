@@ -116,18 +116,9 @@ public class GA {
 		GA.API.Submit.SetupKeys(GA.Settings.GameKey, GA.Settings.SecretKey);
 		
 		if(!Application.isPlaying)
-			return; // no need to setup anything else, if we are in the editor
+			return; // no need to setup anything else, if we are in the editor and not playing
 		
-		GA.Settings.CheckInternetConnectivity();
-		
-		if (GA.Settings.InternetConnectivity)
-			GA.Log("GA initialized, waiting for events..");
-		else
-			GA.Log("GA detects no internet connection..");
-		
-		//Start the submit queue for sending messages to the server
-		GA.RunCoroutine(GA_Queue.SubmitQueue());
-		GA.Log("GameAnalytics: Submission queue started.");
+		GA.RunCoroutine(GA.Settings.CheckInternetConnectivity(true));
 	}
 	
 	/// <summary>

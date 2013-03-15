@@ -118,7 +118,7 @@ public class GA_Inspector : Editor
 		}
 		if (GUILayout.Button(_checkForUpdates, GUILayout.MaxWidth(65)))
 		{
-			Application.OpenURL("http://u3d.as/content/game-analytics/game-analytics-unity-package");
+			Application.OpenURL("http://support.gameanalytics.com/entries/22584741-Download-and-setup"); //http://u3d.as/content/game-analytics/game-analytics-unity-package
 		}
 		
 		GUILayout.EndHorizontal();

@@ -12,10 +12,10 @@ using System;
 [CustomEditor(typeof(GA_HeatMapRenderer))]
 public class GA_HeatMapRendererInspector : Editor
 {
+	private enum PresetColorTypes { Select, YellowRed, BlueRed, LightBlueDarkBlue, PurpleBlack };
 	
-	
-	 void OnSceneGUI () {
-		
+	void OnSceneGUI ()
+	{
 		GA_HeatMapRenderer render = target as GA_HeatMapRenderer;
 		if(!render.ShowValueLabels)
 			return;
@@ -29,14 +29,12 @@ public class GA_HeatMapRendererInspector : Editor
 		
 	}
 	
-	void OnEnable () {
-		
+	void OnEnable ()
+	{
 		GA_HeatMapRenderer render = target as GA_HeatMapRenderer;
 		
 		if(render.Histogram == null)
-			render.Histogram = new GA_Histogram();
-		
-					
+			render.Histogram = new GA_Histogram();			
 	}
 
 	void HandleRenderdatafilterOnDataUpdate (GA_HeatMapDataFilterBase sender)
@@ -44,6 +42,7 @@ public class GA_HeatMapRendererInspector : Editor
 		GA_HeatMapRenderer render = target as GA_HeatMapRenderer;
 		render.OnDataUpdate();
 	}
+	
 	Rect lastrect = new Rect(0f,0f,0f,0f);
 	
 	override public void OnInspectorGUI ()
@@ -143,7 +142,7 @@ public class GA_HeatMapRendererInspector : Editor
 					float rangePct = (pct-render.RangeMin)/(render.RangeMax-render.RangeMin);
 						
 					float line,linePct,colorPct,barHeight;
-					Color color;
+					Color color = Color.white;
 					for (int xline = 0; xline < lineWidth; xline++)
 					{
 						Vector2 guiPos = EditorGUIUtility.GUIToScreenPoint(new Vector2(x, y));
@@ -151,10 +150,30 @@ public class GA_HeatMapRendererInspector : Editor
 						barHeight = Mathf.Max(0f, barHeight);
 						line = x-lineWidth/2+xline;
 						linePct = pct+1f/render.Histogram.Data.Length*(xline/lineWidth);
-						colorPct = rangePct+1f/render.Histogram.Data.Length*(xline/lineWidth);
-						color = Color.Lerp(render.MinColor,render.MaxColor,colorPct);
+						
+						if (render.Histogram.RealDataMin >= 0)
+						{
+							colorPct = rangePct+1f/render.Histogram.Data.Length*(xline/lineWidth);
+							color = Color.Lerp(render.MinColor,render.MaxColor,colorPct);
+						}
+						else
+						{
+							float zeroNorm = (0 - render.Histogram.RealDataMin) / (render.Histogram.RealDataMax - render.Histogram.RealDataMin);
+							if (rangePct <= zeroNorm)
+							{
+								float newNorm = rangePct / zeroNorm;
+								color = Color.Lerp(render.MinColor,Color.white,newNorm);
+							}
+							else
+							{
+								float newNorm = zeroNorm / rangePct;
+								color = Color.Lerp(Color.white,render.MaxColor,1 - newNorm);
+							}
+						}
+						
 						if(linePct<=render.RangeMin || linePct>=render.RangeMax)
 							color = nonSelectedColor;
+						
 						GA_GUIHelper.DrawLine(new Vector2(line, y), new Vector2(line, y-barHeight), color);
 					}
 				}
@@ -180,16 +199,23 @@ public class GA_HeatMapRendererInspector : Editor
 		GUIUtility.RotateAroundPivot(-50f,label);
 		
 		// 100% label. real value
-		label = new Vector2(lastrect.xMax-40,lastrect.yMin-15);
+		label = new Vector2(lastrect.xMax-(10+Mathf.Pow(render.Histogram.RealDataMax, 0.25f)),lastrect.yMin-15);
 		
-		GUI.Label(new Rect(label.x,label.y,50,20),render.Histogram.RealDataMax.ToString("G5"),EditorStyles.miniLabel);
+		GUI.Label(new Rect(label.x,label.y,75,20),render.Histogram.RealDataMax.ToString("G5"),EditorStyles.miniLabel);
 		
 		// 0% label. real value
-		label = new Vector2(lastrect.xMin+10,lastrect.yMin-15);
-		GUI.Label(new Rect(label.x,label.y,50,20),render.Histogram.RealDataMin.ToString("G5"),EditorStyles.miniLabel);
-			
-
-		 GUILayout.EndHorizontal();
+		label = new Vector2(lastrect.xMin,lastrect.yMin-15);
+		GUI.Label(new Rect(label.x,label.y,75,20),render.Histogram.RealDataMin.ToString("G5"),EditorStyles.miniLabel);
+		
+		/*if (render.Histogram.RealDataMin < 0)
+		{
+			// if minimum count is below zero then also show zero real value point
+			float zeroNorm = (0 - render.Histogram.RealDataMin) / (render.Histogram.RealDataMax - render.Histogram.RealDataMin);
+			label = new Vector2((zeroNorm * lastrect.xMax),lastrect.yMin-15);
+			GUI.Label(new Rect(label.x,label.y,75,20),"0",EditorStyles.miniLabel);
+		}*/
+		
+		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
 		GUILayout.Box("",GUIStyle.none,GUILayout.Width(8));//layout hack
@@ -198,11 +224,36 @@ public class GA_HeatMapRendererInspector : Editor
 		GUILayout.EndHorizontal();
 		
 
-		render.MinColor= EditorGUI.ColorField(new Rect(lastrect.xMin-10,lastrect.yMax+44,50,18),render.MinColor);
-		render.MaxColor= EditorGUI.ColorField(new Rect(lastrect.xMax-45,lastrect.yMax+44,50,18),render.MaxColor);
+		render.MinColor = EditorGUI.ColorField(new Rect(lastrect.xMin-10,lastrect.yMax+44,50,18),render.MinColor);
+		render.MaxColor = EditorGUI.ColorField(new Rect(lastrect.xMax-45,lastrect.yMax+44,50,18),render.MaxColor);
 		
 		GUILayout.BeginHorizontal();
 		GUILayout.Box("",GUIStyle.none,GUILayout.Height(70));//layout hack
+		GUILayout.EndHorizontal();
+		
+		GUILayout.BeginHorizontal();
+		EditorGUILayout.PrefixLabel("Preset Colors:");
+		PresetColorTypes presetColor = PresetColorTypes.Select;
+		presetColor = (PresetColorTypes)EditorGUILayout.EnumPopup(presetColor);
+		switch (presetColor)
+		{
+			case PresetColorTypes.YellowRed:
+				render.MinColor = Color.yellow;
+				render.MaxColor = Color.red;
+				break;
+			case PresetColorTypes.BlueRed:
+				render.MinColor = Color.blue;
+				render.MaxColor = Color.red;
+				break;
+			case PresetColorTypes.LightBlueDarkBlue:
+				render.MinColor = new Color(0.75f, 0.75f, 1, 1);
+				render.MaxColor = new Color(0, 0, 0.5f, 1);
+				break;
+			case PresetColorTypes.PurpleBlack:
+				render.MinColor = Color.magenta;
+				render.MaxColor = Color.black;
+				break;
+		}
 		GUILayout.EndHorizontal();
 		
 		GUILayout.BeginHorizontal();

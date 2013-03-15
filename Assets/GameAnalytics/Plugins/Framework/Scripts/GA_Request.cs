@@ -46,6 +46,8 @@ public class GA_Request
 		
 		string requestInfo = "game_key=" + game_key + "&keys=area%7Cevent_id%7Cbuild";
 		
+		requestInfo = requestInfo.Replace(" ", "%20");
+		
 		//Get the url with the request type
 		string url = GetURL(Requests[RequestType.GA_GetHeatmapGameInfo]);
 		
@@ -54,7 +56,6 @@ public class GA_Request
 		//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
 		Hashtable headers = new Hashtable();
 		headers.Add("Authorization", GA.API.Submit.CreateMD5Hash(requestInfo + GA.Settings.ApiKey));
-		Debug.Log("API KeY: " + GA.Settings.ApiKey);
 		
 		//Try to send the data
 		WWW www = new WWW(url, new byte[] { 0 }, headers);
@@ -83,6 +84,8 @@ public class GA_Request
 		}
 		
 		string requestInfo = "game_key=" + game_key + "&event_ids=" + event_ids + "&area=" + area;
+		
+		requestInfo = requestInfo.Replace(" ", "%20");
 
 		if (startDate.HasValue && endDate.HasValue)
 		{

@@ -12,6 +12,8 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 {
+	public enum CombineHeatmapType { None, Add, Subtract, SubtractZero };
+	
 	[HideInInspector]
 	public List<string> AvailableTypes;
 	[HideInInspector]
@@ -25,6 +27,10 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 	public bool RedownloadDataOnPlay;
 	
 	public bool IgnoreDates = true;
+	
+	public bool DownloadingData = false;
+	public bool BuildingHeatmap = false;
+	public float BuildHeatmapPercentage = 0;
 	
 	//Pretty silly hack to force Unity to serialize DateTime. 
 	//(It makes sense that it doesn't serialize structs, but there might be a better workaround.
@@ -66,6 +72,8 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 	public GA_HeatmapData DataContainer;
 	[SerializeField]
 	private bool didInit = false;
+	
+	private CombineHeatmapType _combineType = CombineHeatmapType.None;
 	
 	public void OnEnable ()
 	{	
@@ -142,7 +150,10 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 	
 	public void OnSuccessDownload(GA_Request.RequestType requestType, JsonData jsonList, GA_Request.SubmitErrorHandler errorEvent)
 	{
-		if(DataContainer == null) 
+		DownloadingData = false;
+		BuildingHeatmap = true;
+		
+		if(DataContainer == null)
 		{
 			var dataContainerObject = new GameObject("GA_Data");
 			dataContainerObject.transform.parent = transform;
@@ -151,24 +162,97 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 			DataContainer.Data = new List<GA_DataPoint>();
 			GA.Log(DataContainer);
 		}
-		else
+		else if (_combineType == CombineHeatmapType.None)
 			DataContainer.Data.Clear();
+		
+		List<GA_DataPoint> DPsToDelete = new List<GA_DataPoint>();
 		
 		for (int i = 0; i < jsonList["x"].Count; i++)
 		{
 			try
 			{
-				GA_DataPoint p = new GA_DataPoint();
-				p.position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
-				p.count = int.Parse(jsonList["value"][i].ToString());
-				DataContainer.Data.Add(p);
+				bool done = false;
+				if (_combineType == CombineHeatmapType.Add)
+				{
+					Vector3 position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
+					int count = int.Parse(jsonList["value"][i].ToString());
+					
+					for (int u = 0; u < DataContainer.Data.Count; u++)
+					{
+						if (DataContainer.Data[u].position == position)
+						{
+							DataContainer.Data[u].count += count;
+							done = true;
+							u = DataContainer.Data.Count;
+						}
+					}
+				}
+				else if (_combineType == CombineHeatmapType.Subtract)
+				{
+					Vector3 position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
+					int count = int.Parse(jsonList["value"][i].ToString());
+					
+					for (int u = 0; u < DataContainer.Data.Count; u++)
+					{
+						if (DataContainer.Data[u].position == position)
+						{
+							DataContainer.Data[u].count = DataContainer.Data[u].count - count;
+							
+							u = DataContainer.Data.Count;
+							done = true;
+						}
+					}
+				}
+				else if (_combineType == CombineHeatmapType.SubtractZero)
+				{
+					done = true;
+					
+					Vector3 position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
+					int count = int.Parse(jsonList["value"][i].ToString());
+					
+					for (int u = 0; u < DataContainer.Data.Count; u++)
+					{
+						if (DataContainer.Data[u].position == position)
+						{
+							DataContainer.Data[u].count = Mathf.Max(DataContainer.Data[u].count - count, 0);
+							
+							if (DataContainer.Data[u].count == 0)
+								DPsToDelete.Add(DataContainer.Data[u]);
+							
+							u = DataContainer.Data.Count;
+						}
+					}
+				}
+				
+				if (_combineType == CombineHeatmapType.Subtract && !done)
+				{
+					GA_DataPoint p = new GA_DataPoint();
+					p.position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
+					p.count = -(int.Parse(jsonList["value"][i].ToString()));
+					DataContainer.Data.Add(p);
+				}
+				else if (_combineType != CombineHeatmapType.Subtract && (_combineType == CombineHeatmapType.None || !done))
+				{
+					GA_DataPoint p = new GA_DataPoint();
+					p.position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
+					p.count = int.Parse(jsonList["value"][i].ToString());
+					DataContainer.Data.Add(p);
+				}
 			} 
-			catch
+			catch (Exception e)
 			{
 				// JSON format error
-				GA.LogError("GameAnalytics: Error in parsing JSON data from server");
+				GA.LogError("GameAnalytics: Error in parsing JSON data from server - " + e.Message);
 			}
+			BuildHeatmapPercentage = (i * 100) / jsonList["x"].Count;
 		}
+		foreach (GA_DataPoint dp in DPsToDelete)
+		{
+			DataContainer.Data.Remove(dp);
+		}
+		
+		BuildingHeatmap = false;
+		BuildHeatmapPercentage = 0;
 		
 		NormalizeDataPoints (DataContainer.Data);
 		
@@ -182,8 +266,15 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 		Loading = false;
 	}
 	
+	public void SetCombineHeatmapType(CombineHeatmapType combineType)
+	{
+		_combineType = combineType;
+	}
+	
 	public  void DownloadData()
 	{
+		DownloadingData = true;
+		
 		List<string> events = new List<string>();
 		
 		for(int i = 0; i<AvailableEvents.Count;i++)

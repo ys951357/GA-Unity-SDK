@@ -31,7 +31,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.3.2";
+	public static string VERSION = "0.3.5";
 	
 	#endregion
 	
@@ -48,6 +48,8 @@ public class GA_Settings : ScriptableObject
 	public int BusinessMessagesFailed;
 	public int UserMessagesSubmitted;
 	public int UserMessagesFailed;
+	
+	public string CustomArea = string.Empty;
 	
 	//Set the track target to use for predefined events, such as CriticalFPS (position of track target is sent with these events).
 	public Transform TrackTarget;
@@ -143,34 +145,64 @@ public class GA_Settings : ScriptableObject
 	/// <summary>
 	/// Checks the internet connectivity, and sets INTERNETCONNECTIVITY
 	/// </summary>
-	public void CheckInternetConnectivity()
+	public IEnumerator CheckInternetConnectivity(bool startQueue)
 	{
-		#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN
-		
-		try
-		{
-			System.Net.Sockets.TcpClient clnt = new System.Net.Sockets.TcpClient("www.gameanalytics.com", 80);
-			clnt.Close();
-			InternetConnectivity = true;
-		}
-		catch(System.Exception)
+		// Application.internetReachability returns the type of Internet reachability currently possible on the device, but does not check if the there is an actual route to the network. So we can check this instantly.
+		if (Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork && !GA.Settings.AllowRoaming)
 		{
 			InternetConnectivity = false;
-		}
-		
-		#else
-		
-		if  (Application.internetReachability == NetworkReachability.ReachableViaLocalAreaNetwork || 
-			(Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork && AllowRoaming))
-		{
-			InternetConnectivity = true;
 		}
 		else
 		{
-			InternetConnectivity = false;
+			//Try to ping the server
+			WWW www = new WWW(GA.API.Submit.GetBaseURL(true) + "/ping");
+				
+			//Wait for response
+			yield return www;
+			
+			try
+			{
+				if (GA.API.Submit.CheckServerReply(www))
+				{
+					InternetConnectivity = true;
+				}
+				else if (www.error != null)
+				{
+					InternetConnectivity = false;
+				}
+				else
+				{
+					//Get the JSON object from the response
+					Dictionary<string, object> returnParam = LitJson.JsonMapper.ToObject<Dictionary<string, object>>(www.text);
+					
+					//If the response contains the key "status" with the value "ok" we know that we are connected
+					if (returnParam != null && returnParam.ContainsKey("status") && returnParam["status"].ToString().Equals("ok"))
+					{
+						InternetConnectivity = true;
+					}
+					else
+					{
+						InternetConnectivity = false;
+					}
+				}
+			}
+			catch
+			{
+				InternetConnectivity = false;
+			}
 		}
 		
-		#endif
+		if (startQueue)
+		{
+			if (InternetConnectivity)
+				GA.Log("GA initialized, waiting for events..");
+			else
+				GA.Log("GA detects no internet connection..");
+			
+			//Start the submit queue for sending messages to the server
+			GA.RunCoroutine(GA_Queue.SubmitQueue());
+			GA.Log("GameAnalytics: Submission queue started.");
+		}
 	}
 	
 		
@@ -188,6 +220,19 @@ public class GA_Settings : ScriptableObject
 		{
 			GA.API.GenericInfo.SetCustomUserID(customID);
 		}
+	}
+	
+		
+	/// <summary>
+	/// Sets a custom area string. An area is often just a level, but you can set it to whatever makes sense for your game. F.x. in a big open world game you will probably need custom areas to identify regions etc.
+	/// By default, if no custom area is set, the Application.loadedLevelName string is used.
+	/// </summary>
+	/// <param name="customID">
+	/// The custom area.
+	/// </param>
+	public void SetCustomArea(string customArea)
+	{
+		CustomArea = customArea;
 	}
 	
 	#endregion

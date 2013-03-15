@@ -1,6 +1,13 @@
-[Download from Unity3D Asset Store](http://u3d.as/content/game-analytics/game-analytics-unity-package)
+[Download and Setup](http://support.gameanalytics.com/entries/22584741-Download-and-setup)
 
 ### Recent Changes:
+
+##### v.0.3.5:
+
+- New heatmap features, such as: add/subtract heatmaps, and color presets.
+- Heatmap download indicator.
+- Custom area.
+- A ton of small fixes and improvements.
 
 ##### v.0.3.2:
 

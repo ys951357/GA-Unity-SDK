@@ -82,6 +82,9 @@ public class GA_SpecialEvents : MonoBehaviour
 	
 	public void SubmitAverageFPS()
 	{
+		if (_systemTracker == null)
+			_systemTracker = GetComponent<GA_SystemTracker>();
+		
 		//average FPS
 		if (_systemTracker.SubmitFpsAverage)
 		{
@@ -102,6 +105,9 @@ public class GA_SpecialEvents : MonoBehaviour
 	
 	public void SubmitCriticalFPS()
 	{
+		if (_systemTracker == null)
+			_systemTracker = GetComponent<GA_SystemTracker>();
+		
 		//critical FPS
 		if (_systemTracker.SubmitFpsCritical)
 		{

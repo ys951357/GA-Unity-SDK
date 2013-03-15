@@ -83,7 +83,7 @@ public class GA_Design
 		Dictionary<string, object> parameters = new Dictionary<string, object>()
 		{
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], eventName },
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], Application.loadedLevelName }
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], GA.Settings.CustomArea.Equals(string.Empty)?Application.loadedLevelName:GA.Settings.CustomArea }
 		};
 		
 		if (eventValue.HasValue)

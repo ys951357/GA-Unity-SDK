@@ -145,20 +145,27 @@ public  class GA_GenericInfo
 		
 		#else
 		
-		NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
-		string mac = "";
-
-        foreach (NetworkInterface adapter in nics)
-        {
-        	PhysicalAddress address = adapter.GetPhysicalAddress();
-			if (address.ToString() != "" && mac == "")
-			{
-				byte[] bytes = Encoding.UTF8.GetBytes(address.ToString());
-				SHA1CryptoServiceProvider SHA = new SHA1CryptoServiceProvider();
-				mac = BitConverter.ToString(SHA.ComputeHash(bytes)).Replace("-", "");
+		try
+		{
+			NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
+			string mac = "";
+	
+	        foreach (NetworkInterface adapter in nics)
+	        {
+	        	PhysicalAddress address = adapter.GetPhysicalAddress();
+				if (address.ToString() != "" && mac == "")
+				{
+					byte[] bytes = Encoding.UTF8.GetBytes(address.ToString());
+					SHA1CryptoServiceProvider SHA = new SHA1CryptoServiceProvider();
+					mac = BitConverter.ToString(SHA.ComputeHash(bytes)).Replace("-", "");
+				}
 			}
+			return mac;
 		}
-		return mac;
+		catch
+		{
+			return SystemInfo.deviceUniqueIdentifier;
+		}
 		
 		#endif
 	}
@@ -204,7 +211,8 @@ public  class GA_GenericInfo
 		Dictionary<string, object> parameters = new Dictionary<string, object>()
 		{
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], addRoot + "system:" + key },
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message], type }
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message], type },
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], GA.Settings.CustomArea.Equals(string.Empty)?Application.loadedLevelName:GA.Settings.CustomArea }
 		};
 		
 		return parameters;
@@ -220,38 +228,36 @@ public  class GA_GenericInfo
 	{
 		#if UNITY_STANDALONE_OSX
 		return "MAC";
-		#endif
 
-		#if UNITY_STANDALONE_WIN
+		#elif UNITY_STANDALONE_WIN
 		return "PC";
-		#endif
 		
-		#if UNITY_WEBPLAYER
+		#elif UNITY_WEBPLAYER
 		return "WEBPLAYER";
-		#endif
 		
-		#if UNITY_WII
+		#elif UNITY_WII
 		return "WII";
-		#endif
 		
-		#if UNITY_IPHONE
+		#elif UNITY_IPHONE
 		return "IPHONE";
-		#endif
 
-		#if UNITY_ANDROID
+		#elif UNITY_ANDROID
 		return "ANDROID";
-		#endif
 		
-		#if UNITY_PS3
+		#elif UNITY_PS3
 		return "PS3";
-		#endif
 
-		#if UNITY_XBOX360
+		#elif UNITY_XBOX360
 		return "XBOX";
-		#endif
 		
-		#if UNITY_FLASH
+		#elif UNITY_FLASH
 		return "FLASH";
+		
+		#elif UNITY_LINUX
+		return "LINUX";
+		
+		#else
+		return "UNKNOWN";
 		#endif
 	}
 	

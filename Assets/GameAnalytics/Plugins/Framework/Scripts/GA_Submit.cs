@@ -99,8 +99,7 @@ public class GA_Submit
 		/* Put all the items in the queue into a list containing only the messages of that category type.
 		 * This way we end up with a list of items for each category type */
 		foreach (Item item in queue)
-		{			
-
+		{
 			if (categories.ContainsKey(item.Type))
 			{
 				
@@ -468,11 +467,14 @@ public class GA_Submit
 	/// <returns>
 	/// Return true if response code is from 200 to 299. Otherwise returns false.
 	/// </returns>
-	private bool CheckServerReply(WWW www)
+	public bool CheckServerReply(WWW www)
 	{
-		string errStart = www.error.Substring(0, 3);
-		if (errStart.Equals("201") || errStart.Equals("202") || errStart.Equals("203") || errStart.Equals("204") || errStart.Equals("205") || errStart.Equals("206"))
-			return true;
+		if (www.error != null)
+		{
+			string errStart = www.error.Substring(0, 3);
+			if (errStart.Equals("201") || errStart.Equals("202") || errStart.Equals("203") || errStart.Equals("204") || errStart.Equals("205") || errStart.Equals("206"))
+				return true;
+		}
 		
 		if (!www.responseHeaders.ContainsKey("STATUS"))
 			return false;
@@ -496,7 +498,6 @@ public class GA_Submit
 	
 	/// <summary>
 	/// Dicts to json. This function is 35% faster than the LitJson library.
-	/// GA_TODO: This could be optimized further by not spending time making all those dictionaries beforehand ;)
 	/// </summary>
 	/// <returns>
 	/// The to json.
@@ -519,13 +520,12 @@ public class GA_Submit
 				b.AppendFormat("\"{0}\":\"{1}\"", key, dict[key]);
 				if(c<dict.Keys.Count)
 					b.Append(',');
-				
 			}
 			b.Append('}');
 			d++;
 			if(d<list.Count)
 				b.Append(',');
 		}
-    return b.Append("]").ToString();
+		return b.Append("]").ToString();
 	}
 }

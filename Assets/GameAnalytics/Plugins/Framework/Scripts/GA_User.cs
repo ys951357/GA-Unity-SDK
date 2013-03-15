@@ -37,7 +37,7 @@ public class GA_User
 	/// The code of the country state the user is playing from. Set to "null" if unknown.
 	/// </param>
 	/// /// <param name="friend_count">
-	/// The number of friends in the users network. Set to "null" if unknown.
+	/// The number of friends in the user's network. Set to "null" if unknown.
 	/// </param>
 	private void CreateNewUser(Gender gender, int? birth_year, int? friend_count)
 	{
@@ -60,6 +60,12 @@ public class GA_User
 		if (friend_count.HasValue)
 		{
 			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Friend_Count], friend_count.ToString());
+		}
+		
+		if (parameters.Count == 0)
+		{
+			GA.LogWarning("GA: No data to send with NewUser event; event will not be added to queue");
+			return;
 		}
 
 		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_User, false);

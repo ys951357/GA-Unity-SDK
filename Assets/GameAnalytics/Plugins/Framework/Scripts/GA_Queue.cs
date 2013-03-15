@@ -319,7 +319,7 @@ public static class GA_Queue
 			}
 			
 			// Check to see if we have access to a network connection - if this is the cause of the error future submits will take it into account
-			GA.Settings.CheckInternetConnectivity();
+			GA.RunCoroutine(GA.Settings.CheckInternetConnectivity(false));
 		}
 		
 		_errorQueue.AddRange(items);

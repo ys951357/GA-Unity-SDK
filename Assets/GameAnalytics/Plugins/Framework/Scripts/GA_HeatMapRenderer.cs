@@ -179,6 +179,10 @@ public class GA_HeatMapRenderer : MonoBehaviour
 				m.sharedMaterial.SetFloat("_RangeMin", RangeMin);
 				m.sharedMaterial.SetFloat("_RangeWidth", RangeMax-RangeMin);
 				m.sharedMaterial.SetFloat("_MaxRadius", MaxRadius);
+				
+				float zeroNorm = (0 - Histogram.RealDataMin) / (Histogram.RealDataMax - Histogram.RealDataMin);
+				m.sharedMaterial.SetFloat("_RangeZero", zeroNorm);
+				m.sharedMaterial.SetColor("_ColZero", Color.white);
 			}
 		}
 	}
