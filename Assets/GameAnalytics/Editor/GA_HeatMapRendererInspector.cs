@@ -12,7 +12,7 @@ using System;
 [CustomEditor(typeof(GA_HeatMapRenderer))]
 public class GA_HeatMapRendererInspector : Editor
 {
-	private enum PresetColorTypes { Select, YellowRed, BlueRed, LightBlueDarkBlue, PurpleBlack };
+	public enum PresetColorTypes { None, YellowRed, BlueRed, LightBlueDarkBlue, MagentaBlack, CyanBlack, GreenBlack, WhiteBlack, SalmonBlack };
 	
 	void OnSceneGUI ()
 	{
@@ -232,36 +232,23 @@ public class GA_HeatMapRendererInspector : Editor
 		GUILayout.EndHorizontal();
 		
 		GUILayout.BeginHorizontal();
-		EditorGUILayout.PrefixLabel("Preset Colors:");
-		PresetColorTypes presetColor = PresetColorTypes.Select;
-		presetColor = (PresetColorTypes)EditorGUILayout.EnumPopup(presetColor);
-		switch (presetColor)
-		{
-			case PresetColorTypes.YellowRed:
-				render.MinColor = Color.yellow;
-				render.MaxColor = Color.red;
-				break;
-			case PresetColorTypes.BlueRed:
-				render.MinColor = Color.blue;
-				render.MaxColor = Color.red;
-				break;
-			case PresetColorTypes.LightBlueDarkBlue:
-				render.MinColor = new Color(0.75f, 0.75f, 1, 1);
-				render.MaxColor = new Color(0, 0, 0.5f, 1);
-				break;
-			case PresetColorTypes.PurpleBlack:
-				render.MinColor = Color.magenta;
-				render.MaxColor = Color.black;
-				break;
-		}
-		GUILayout.EndHorizontal();
-		
-		GUILayout.BeginHorizontal();
 		EditorGUILayout.PrefixLabel("Show heatmap:");
 		if (render.BillBoard != null)
 			render.BillBoard.GetComponent<MeshRenderer>().enabled = EditorGUILayout.Toggle(render.BillBoard.GetComponent<MeshRenderer>().enabled);
 		else
 			EditorGUILayout.Toggle(true);
+		GUILayout.EndHorizontal();
+		
+		GUILayout.BeginHorizontal();
+		EditorGUILayout.LabelField("Preset Colors:", GUILayout.Width(155));
+		if (GUILayout.Button("Select Color Preset"))
+		{
+			GA_HeatmapColorPresetPicker colorpresetpicker = ScriptableObject.CreateInstance<GA_HeatmapColorPresetPicker>();
+			colorpresetpicker.ShowUtility();
+			Vector2 pos = EditorGUIUtility.GUIToScreenPoint(new Vector2(GUILayoutUtility.GetLastRect().x + 150, Event.current.mousePosition.y - 25));
+			colorpresetpicker.position = new Rect(pos.x, pos.y, 180, 145);
+			colorpresetpicker.OnPicked += HandleColorPresetPicker;
+		}
 		GUILayout.EndHorizontal();
 		
 		GUILayout.BeginHorizontal();
@@ -312,5 +299,51 @@ public class GA_HeatMapRendererInspector : Editor
 			EditorUtility.SetDirty(target);
 			render.SetMaterialVariables();
 		}
+	}
+	
+	void HandleColorPresetPicker (GA_HeatmapColorPresetPicker sender)
+	{
+		sender.OnPicked -= HandleColorPresetPicker;
+		
+		GA_HeatMapRenderer render = target as GA_HeatMapRenderer;
+		
+		switch (sender.ColorPreset)
+		{
+			case PresetColorTypes.YellowRed:
+				render.MinColor = Color.yellow;
+				render.MaxColor = Color.red;
+				break;
+			case PresetColorTypes.BlueRed:
+				render.MinColor = Color.blue;
+				render.MaxColor = Color.red;
+				break;
+			case PresetColorTypes.LightBlueDarkBlue:
+				render.MinColor = new Color(0.75f, 0.75f, 1, 1);
+				render.MaxColor = new Color(0, 0, 0.5f, 1);
+				break;
+			case PresetColorTypes.MagentaBlack:
+				render.MinColor = Color.magenta;
+				render.MaxColor = Color.black;
+				break;
+			case PresetColorTypes.CyanBlack:
+				render.MinColor = Color.cyan;
+				render.MaxColor = Color.black;
+				break;
+			case PresetColorTypes.GreenBlack:
+				render.MinColor = Color.green;
+				render.MaxColor = Color.black;
+				break;
+			case PresetColorTypes.WhiteBlack:
+				render.MinColor = Color.white;
+				render.MaxColor = Color.black;
+				break;
+			case PresetColorTypes.SalmonBlack:
+				render.MinColor = new Color(1, 0.5f, 0.5f, 1);
+				render.MaxColor = Color.black;
+				break;
+		}
+		
+		render.RenderModelChanged();
+		Repaint();
 	}
 }

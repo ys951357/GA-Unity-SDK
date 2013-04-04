@@ -52,20 +52,11 @@ public class GA_Debug
 			
 			bool errorSubmitted = false;
 			
-			string eventID = "";
-			
-			try
-			{
-				eventID = logString.Split(':')[0];
-			}
-			catch
-			{
-				eventID = logString;
-			}
+			string eventID = "Exception";
 			
 			if (SubmitErrorStackTrace)
 			{
-				SubmitError(eventID, stackTrace);
+				SubmitError(eventID, logString + " " + stackTrace);
 				errorSubmitted = true;
 			}
 			

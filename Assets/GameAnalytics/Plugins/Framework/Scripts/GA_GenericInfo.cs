@@ -87,7 +87,7 @@ public  class GA_GenericInfo
 	/// <returns>
 	/// The message to submit to the GA server is a dictionary of all the relevant parameters (containing user ID, session ID, system information, language information, date/time, build version) <see cref="Dictionary<System.String, System.Object>"/>
 	/// </returns>
-	public  List<Dictionary<string, object>> GetGenericInfo(string root)
+	public  List<Dictionary<string, object>> GetGenericInfo(string message)
 	{
 		List<Dictionary<string, object>> systemspecs = new List<Dictionary<string, object>>();
 		
@@ -99,28 +99,28 @@ public  class GA_GenericInfo
 		
 		#if !UNITY_IPHONE
 		
-		systemspecs.Add(AddSystemSpecs("unity_wrapper", GA_Settings.VERSION, root));
-		systemspecs.Add(AddSystemSpecs("os", SystemInfo.operatingSystem, root));
-		systemspecs.Add(AddSystemSpecs("processor_type", SystemInfo.processorType, root));
-		systemspecs.Add(AddSystemSpecs("gfx_name", SystemInfo.graphicsDeviceName, root));
-		systemspecs.Add(AddSystemSpecs("gfx_version", SystemInfo.graphicsDeviceVersion, root));
+		systemspecs.Add(AddSystemSpecs("unity_wrapper", GA_Settings.VERSION, message));
+		systemspecs.Add(AddSystemSpecs("os", SystemInfo.operatingSystem, message));
+		systemspecs.Add(AddSystemSpecs("processor_type", SystemInfo.processorType, message));
+		systemspecs.Add(AddSystemSpecs("gfx_name", SystemInfo.graphicsDeviceName, message));
+		systemspecs.Add(AddSystemSpecs("gfx_version", SystemInfo.graphicsDeviceVersion, message));
 		
 		// Unity provides lots of additional system info which might be worth tracking for some games:
-		//systemspecs.Add(AddSystemSpecs("process_count", SystemInfo.processorCount.ToString(), root));
-		//systemspecs.Add(AddSystemSpecs("sys_mem_size", SystemInfo.systemMemorySize.ToString(), root));
-		//systemspecs.Add(AddSystemSpecs("gfx_mem_size", SystemInfo.graphicsMemorySize.ToString(), root));
-		//systemspecs.Add(AddSystemSpecs("gfx_vendor", SystemInfo.graphicsDeviceVendor, root));
-		//systemspecs.Add(AddSystemSpecs("gfx_id", SystemInfo.graphicsDeviceID.ToString(), root));
-		//systemspecs.Add(AddSystemSpecs("gfx_vendor_id", SystemInfo.graphicsDeviceVendorID.ToString(), root));
-		//systemspecs.Add(AddSystemSpecs("gfx_shader_level", SystemInfo.graphicsShaderLevel.ToString(), root));
-		//systemspecs.Add(AddSystemSpecs("gfx_pixel_fillrate", SystemInfo.graphicsPixelFillrate.ToString(), root));
-		//systemspecs.Add(AddSystemSpecs("sup_shadows", SystemInfo.supportsShadows.ToString(), root));
-		//systemspecs.Add(AddSystemSpecs("sup_render_textures", SystemInfo.supportsRenderTextures.ToString(), root));
-		//systemspecs.Add(AddSystemSpecs("sup_image_effects", SystemInfo.supportsImageEffects.ToString(), root));
+		//systemspecs.Add(AddSystemSpecs("process_count", SystemInfo.processorCount.ToString(), message));
+		//systemspecs.Add(AddSystemSpecs("sys_mem_size", SystemInfo.systemMemorySize.ToString(), message));
+		//systemspecs.Add(AddSystemSpecs("gfx_mem_size", SystemInfo.graphicsMemorySize.ToString(), message));
+		//systemspecs.Add(AddSystemSpecs("gfx_vendor", SystemInfo.graphicsDeviceVendor, message));
+		//systemspecs.Add(AddSystemSpecs("gfx_id", SystemInfo.graphicsDeviceID.ToString(), message));
+		//systemspecs.Add(AddSystemSpecs("gfx_vendor_id", SystemInfo.graphicsDeviceVendorID.ToString(), message));
+		//systemspecs.Add(AddSystemSpecs("gfx_shader_level", SystemInfo.graphicsShaderLevel.ToString(), message));
+		//systemspecs.Add(AddSystemSpecs("gfx_pixel_fillrate", SystemInfo.graphicsPixelFillrate.ToString(), message));
+		//systemspecs.Add(AddSystemSpecs("sup_shadows", SystemInfo.supportsShadows.ToString(), message));
+		//systemspecs.Add(AddSystemSpecs("sup_render_textures", SystemInfo.supportsRenderTextures.ToString(), message));
+		//systemspecs.Add(AddSystemSpecs("sup_image_effects", SystemInfo.supportsImageEffects.ToString(), message));
 		
 		#else
 		
-		systemspecs.Add(AddSystemSpecs("os", "iOS", root));
+		systemspecs.Add(AddSystemSpecs("os", "iOS", message));
 		
 		#endif
 		
@@ -202,16 +202,16 @@ public  class GA_GenericInfo
 	/// <param name="parameters">
 	/// The parameters which will be sent to the server <see cref="Dictionary<System.String, System.Object>"/>
 	/// </param>
-	private  Dictionary<string, object> AddSystemSpecs(string key, string type, string root)
+	private  Dictionary<string, object> AddSystemSpecs(string key, string type, string message)
 	{
-		string addRoot = "";
-		if (root != "")
-			addRoot = root + ":";
+		string addmessage = "";
+		if (message != "")
+			addmessage =  ": " + message;
 		
 		Dictionary<string, object> parameters = new Dictionary<string, object>()
 		{
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], addRoot + "system:" + key },
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message], type },
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], "system:" + key },
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message], type + addmessage },
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], GA.Settings.CustomArea.Equals(string.Empty)?Application.loadedLevelName:GA.Settings.CustomArea }
 		};
 		

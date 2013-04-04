@@ -53,7 +53,7 @@ Shader "Custom/GA_HeatMapTransparent"
 			v2f vert(appdata_full v)
 			{
 				v.vertex = mul(_Object2World, v.vertex);
-				v.normal = normalize(_WorldSpaceCameraPos - v.vertex);
+				v.normal = normalize(_WorldSpaceCameraPos - (float3)v.vertex);
 				float3 up = float3(0,1,0);
 				float3 side = normalize(cross(v.normal, up));
 				float radius = v.color.x/2;
@@ -67,7 +67,7 @@ Shader "Custom/GA_HeatMapTransparent"
 				v2f o;
 				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.uv_MainTex = TRANSFORM_TEX(v.texcoord, _MainTex);
-				o.normal = v.color;
+				o.normal = (float3)v.color;
 				return o;
 			}
 			

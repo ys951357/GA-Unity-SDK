@@ -2,6 +2,10 @@
 
 ### Recent Changes:
 
+##### v.0.3.7:
+
+- Minor bug fixes.
+
 ##### v.0.3.5:
 
 - New heatmap features, such as: add/subtract heatmaps, and color presets.
