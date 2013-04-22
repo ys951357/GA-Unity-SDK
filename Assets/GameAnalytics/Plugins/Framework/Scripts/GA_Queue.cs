@@ -72,10 +72,10 @@ public static class GA_Queue
 	/// <param name="stack">
 	/// If true any identical messages in the queue will be merged/stacked as a single message, to save server load
 	/// </param>
-	public static void AddItem(Dictionary<string, object> parameters, GA_Submit.CategoryType type, bool stack)
+	public static void AddItem(Hashtable parameters, GA_Submit.CategoryType type, bool stack)
 	{
 		//No reason to add any more items if we have stopped submitting data or we are not supposed to submit in the first place
-		if (_endsubmit || (Application.isEditor && !GA.Settings.RunInEditorPlayMode))
+		if (_endsubmit || (Application.isEditor && !GA.SettingsGA.RunInEditorPlayMode))
 		{
 			return;
 		}
@@ -122,9 +122,9 @@ public static class GA_Queue
 		while (!_endsubmit)
 		{
 
-			while (GA.Settings.CustomUserID && GA.API.GenericInfo.UserID == string.Empty)
+			while (GA.SettingsGA.CustomUserID && GA.API.GenericInfo.UserID == string.Empty)
 			{
-				GA.LogWarning("GameAnalytics: User ID not set, not sending data. Waiting 10 sec. to try again.");
+				GA.LogWarning("GameAnalytics: User ID not set. No data will be sent until Custom User ID is set.");
 				yield return new WaitForSeconds(10f);
 			}
 			
@@ -135,7 +135,7 @@ public static class GA_Queue
 			}
 			
 			//If we have internet connection then add any archived data to the submit queue
-			if (GA.Settings.ArchiveData && GA.Settings.InternetConnectivity)
+			if (GA.SettingsGA.ArchiveData && GA.SettingsGA.InternetConnectivity)
 			{
 				List<GA_Submit.Item> archivedItems = GA.API.Archive.GetArchivedData();
 				
@@ -146,7 +146,7 @@ public static class GA_Queue
 						GA_Queue.AddItem(item.Parameters, item.Type, false);
 					}
 				
-					if (GA.Settings.DebugMode)
+					if (GA.SettingsGA.DebugMode)
 					{
 						GA.Log("GA: Network connection detected. Adding archived data to next submit queue.");
 					}
@@ -156,7 +156,7 @@ public static class GA_Queue
 			ForceSubmit();
 			
 			//Wait for the next timer interval before we try to submit again
-			yield return new WaitForSeconds(GA.Settings.SubmitInterval);
+			yield return new WaitForSeconds(GA.SettingsGA.SubmitInterval);
 		}
 	}
 	
@@ -223,23 +223,23 @@ public static class GA_Queue
 		// Update GA_Status
 		if (success)
 		{
-			GA.Settings.TotalMessagesSubmitted += items.Count;
+			GA.SettingsGA.TotalMessagesSubmitted += items.Count;
 			
 			foreach (GA_Submit.Item it in items)
 			{
 				switch (it.Type)
 				{
 				case GA_Submit.CategoryType.GA_Event:
-					GA.Settings.DesignMessagesSubmitted++;
+					GA.SettingsGA.DesignMessagesSubmitted++;
 					break;
 				case GA_Submit.CategoryType.GA_Log:
-					GA.Settings.QualityMessagesSubmitted++;
+					GA.SettingsGA.QualityMessagesSubmitted++;
 					break;
 				case GA_Submit.CategoryType.GA_Purchase:
-					GA.Settings.BusinessMessagesSubmitted++;
+					GA.SettingsGA.BusinessMessagesSubmitted++;
 					break;
 				case GA_Submit.CategoryType.GA_User:
-					GA.Settings.UserMessagesSubmitted++;
+					GA.SettingsGA.UserMessagesSubmitted++;
 					break;
 				}
 			}
@@ -249,7 +249,7 @@ public static class GA_Queue
 		 * we can return to collecting new events normally */
 		if (_submitCount >= _queue.Count)
 		{
-			if (GA.Settings.DebugMode)
+			if (GA.SettingsGA.DebugMode)
 			{
 				GA.Log("GA: Queue submit over");
 			}
@@ -297,29 +297,29 @@ public static class GA_Queue
 		else
 		{
 			// Update GA_Status
-			GA.Settings.TotalMessagesFailed += items.Count;
+			GA.SettingsGA.TotalMessagesFailed += items.Count;
 			
 			foreach (GA_Submit.Item it in items)
 			{
 				switch (it.Type)
 				{
 				case GA_Submit.CategoryType.GA_Event:
-					GA.Settings.DesignMessagesFailed++;
+					GA.SettingsGA.DesignMessagesFailed++;
 					break;
 				case GA_Submit.CategoryType.GA_Log:
-					GA.Settings.QualityMessagesFailed++;
+					GA.SettingsGA.QualityMessagesFailed++;
 					break;
 				case GA_Submit.CategoryType.GA_Purchase:
-					GA.Settings.BusinessMessagesFailed++;
+					GA.SettingsGA.BusinessMessagesFailed++;
 					break;
 				case GA_Submit.CategoryType.GA_User:
-					GA.Settings.UserMessagesFailed++;
+					GA.SettingsGA.UserMessagesFailed++;
 					break;
 				}
 			}
 			
 			// Check to see if we have access to a network connection - if this is the cause of the error future submits will take it into account
-			GA.RunCoroutine(GA.Settings.CheckInternetConnectivity(false));
+			GA.RunCoroutine(GA.SettingsGA.CheckInternetConnectivity(false));
 		}
 		
 		_errorQueue.AddRange(items);

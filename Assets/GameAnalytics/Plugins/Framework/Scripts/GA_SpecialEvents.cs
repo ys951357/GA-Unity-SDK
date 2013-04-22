@@ -95,8 +95,8 @@ public class GA_SpecialEvents : MonoBehaviour
 			
 			if (fpsSinceUpdate > 0)
 			{
-				if (GA.Settings.TrackTarget != null)
-					GA.API.Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString(), GA.Settings.TrackTarget.position);
+				if (GA.SettingsGA.TrackTarget != null)
+					GA.API.Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString(), GA.SettingsGA.TrackTarget.position);
 				else
 					GA.API.Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString());
 			}
@@ -118,8 +118,8 @@ public class GA_SpecialEvents : MonoBehaviour
 			
 			if (fpsSinceUpdate <= _systemTracker.FpsCriticalThreshold)
 			{
-				if (GA.Settings.TrackTarget != null)
-					GA.API.Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString(), GA.Settings.TrackTarget.position);
+				if (GA.SettingsGA.TrackTarget != null)
+					GA.API.Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString(), GA.SettingsGA.TrackTarget.position);
 				else
 					GA.API.Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString());
 				
@@ -137,8 +137,8 @@ public class GA_SpecialEvents : MonoBehaviour
 		
 		if (_systemTracker.IncludeSceneChange)
 		{
-			if (GA.Settings.TrackTarget != null)
-				GA.API.Design.NewEvent("GA:LevelStarted", Time.time - _lastLevelStartTime, GA.Settings.TrackTarget.position);
+			if (GA.SettingsGA.TrackTarget != null)
+				GA.API.Design.NewEvent("GA:LevelStarted", Time.time - _lastLevelStartTime, GA.SettingsGA.TrackTarget.position);
 			else
 				GA.API.Design.NewEvent("GA:LevelStarted", Time.time - _lastLevelStartTime);
 		}

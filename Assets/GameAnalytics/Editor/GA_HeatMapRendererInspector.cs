@@ -26,7 +26,6 @@ public class GA_HeatMapRendererInspector : Editor
 		{
          	Handles.Label(p.position+Vector3.up*1,p.count.ToString(),EditorStyles.toolbarTextField);
 		}
-		
 	}
 	
 	void OnEnable ()
@@ -92,7 +91,6 @@ public class GA_HeatMapRendererInspector : Editor
 		EditorGUILayout.BeginHorizontal();
 		
 		
-		
 		GUILayout.Box("",GUIStyle.none,GUILayout.Width(20));//layout hack
 		GUILayout.Box("",GUILayout.MinWidth(50),GUILayout.MaxWidth(700),GUILayout.MinHeight(200));
 		if(Event.current.type == EventType.Repaint)
@@ -102,9 +100,13 @@ public class GA_HeatMapRendererInspector : Editor
 		
 		GUILayout.Box("",GUIStyle.none,GUILayout.Width(15));//layout hack to get right margin
 		
-		if(render.Histogram != null && (render.Histogram.Data == null || render.Histogram.Data.Length==0))
+		if (render.Histogram != null && (render.Histogram.Data == null || render.Histogram.Data.Length==0))
 		{
 			GUI.Label(new Rect(lastrect.x+lastrect.width/2-50,lastrect.y+lastrect.height/2,100,40),"No data loaded",EditorStyles.largeLabel);
+		}
+		else if (render.Histogram != null && render.Histogram.Data != null && render.Histogram.Data.Length < 3)
+		{
+			GUI.Label(new Rect(lastrect.x+lastrect.width/2-105,lastrect.y+lastrect.height/2,300,40),"Not enough data to show histogram",EditorStyles.largeLabel);
 		}
 		
 		Vector2 textPos = new Vector2(lastrect.xMin+lastrect.height/2-63, lastrect.yMax-20);
@@ -118,7 +120,7 @@ public class GA_HeatMapRendererInspector : Editor
 		GUIUtility.RotateAroundPivot(90f,new Vector2(lastrect.xMin,lastrect.yMax));
 		GUI.Label(new Rect(lastrect.xMin+lastrect.width/2-85,lastrect.yMax+40,200,20),"Frequency / event occurrences",EditorStyles.label);
 		
-		if (render.Histogram.Data != null)
+		if (render.Histogram.Data != null && render.Histogram.Data.Length >= 3)
 		{
 			float margin = lastrect.width/(render.Histogram.Data.Length);
 				

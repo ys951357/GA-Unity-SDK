@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.IO;
-using LitJson;
+//using LitJson;
 
 public  class GA_Archive
 {
@@ -25,19 +25,19 @@ public  class GA_Archive
 	/// </param>
 	public  void ArchiveData(string json, GA_Submit.CategoryType serviceType)
 	{
-		#if !UNITY_WEBPLAYER
+		#if !UNITY_WEBPLAYER && !UNITY_NACL && !UNITY_FLASH
 		
 		StreamWriter fileWriter = null;
 		string fileName = Application.persistentDataPath + "/" + FILE_NAME;
 		
 		if (File.Exists(fileName))
 		{
-			if (new FileInfo(fileName).Length + System.Text.ASCIIEncoding.Unicode.GetByteCount(json) <= GA.Settings.ArchiveMaxFileSize)
+			if (new FileInfo(fileName).Length + System.Text.ASCIIEncoding.Unicode.GetByteCount(json) <= GA.SettingsGA.ArchiveMaxFileSize)
 			{
 				fileWriter = File.AppendText(fileName);
 			}
 		}
-		else if (System.Text.ASCIIEncoding.Unicode.GetByteCount(json) <= GA.Settings.ArchiveMaxFileSize)
+		else if (System.Text.ASCIIEncoding.Unicode.GetByteCount(json) <= GA.SettingsGA.ArchiveMaxFileSize)
 		{
 			fileWriter = File.CreateText(fileName);
 		}
@@ -60,7 +60,7 @@ public  class GA_Archive
 	/// </returns>
 	public  List<GA_Submit.Item> GetArchivedData()
 	{
-		#if UNITY_WEBPLAYER
+		#if UNITY_WEBPLAYER || UNITY_NACL || UNITY_FLASH
 		
 		return null;
 		
@@ -101,9 +101,9 @@ public  class GA_Archive
 					
 					if (saveData)
 					{
-						List<Dictionary<string, object>> itemsParameters = JsonMapper.ToObject<List<Dictionary<string, object>>>(json);
+						ArrayList itemsParameters = (ArrayList)MiniJSON.JsonDecode(json);//JsonMapper.ToObject<List<Dictionary<string, object>>>(json);
 						
-						foreach (Dictionary<string, object> parameters in itemsParameters)
+						foreach (Hashtable parameters in itemsParameters)
 						{
 							GA_Submit.Item item = new GA_Submit.Item
 							{

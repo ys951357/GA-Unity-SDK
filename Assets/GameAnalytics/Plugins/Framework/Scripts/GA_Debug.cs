@@ -14,10 +14,10 @@ public class GA_Debug
 	public bool SubmitErrorStackTrace;
 	public bool SubmitErrorSystemInfo;
 	
-	private  int _errorCount = 0;
+	private int _errorCount = 0;
 	
-	private  bool _showLogOnGUI = true;
-	public  List<string> Messages;
+	private bool _showLogOnGUI = true;
+	public List<string> Messages;
 	
 	/// <summary>
 	/// If SubmitErrors is enabled on the GA object this makes sure that any exceptions or errors are submitted to the GA server
@@ -31,7 +31,7 @@ public class GA_Debug
 	/// <param name="type">
 	/// The type of the log message (we only submit errors and exceptions to the GA server) <see cref="LogType"/>
 	/// </param>
-	public  void HandleLog(string logString, string stackTrace, LogType type)
+	public void HandleLog(string logString, string stackTrace, LogType type)
 	{
 		//Only used if the GA_DebugGUI script is added to the GA object (for testing)
 		if (_showLogOnGUI)
@@ -62,9 +62,9 @@ public class GA_Debug
 			
 			if (SubmitErrorSystemInfo)
 			{
-				List<Dictionary<string, object>> systemspecs = GA.API.GenericInfo.GetGenericInfo(eventID);
+				List<Hashtable> systemspecs = GA.API.GenericInfo.GetGenericInfo(logString);
 			
-				foreach (Dictionary<string, object> spec in systemspecs)
+				foreach (Hashtable spec in systemspecs)
 				{
 					GA_Queue.AddItem(spec, GA_Submit.CategoryType.GA_Log, false);
 				}
@@ -79,11 +79,11 @@ public class GA_Debug
 		}
     }
 	
-	public  void SubmitError(string eventName, string message)
+	public void SubmitError(string eventName, string message)
 	{
 		Vector3 target = Vector3.zero;
-		if (GA.Settings.TrackTarget != null)
-			target = GA.Settings.TrackTarget.position;
+		if (GA.SettingsGA.TrackTarget != null)
+			target = GA.SettingsGA.TrackTarget.position;
 		
 		GA.API.Quality.NewErrorEvent(eventName, message, target.x, target.y, target.z);
 	}

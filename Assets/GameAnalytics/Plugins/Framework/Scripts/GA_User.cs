@@ -41,7 +41,7 @@ public class GA_User
 	/// </param>
 	private void CreateNewUser(Gender gender, int? birth_year, int? friend_count)
 	{
-		Dictionary<string, object> parameters = new Dictionary<string, object>();
+		Hashtable parameters = new Hashtable();
 		
 		if (gender == Gender.Male)
 		{
@@ -52,7 +52,7 @@ public class GA_User
 			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Gender], 'F');
 		}
 		
-		if (birth_year.HasValue && birth_year != 0)
+		if (birth_year.HasValue && birth_year.Value != 0)
 		{
 			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Birth_year], birth_year.ToString());
 		}

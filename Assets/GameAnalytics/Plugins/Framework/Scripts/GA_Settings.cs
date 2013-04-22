@@ -31,7 +31,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.3.7";
+	public static string VERSION = "0.4.0";
 	
 	#endregion
 	
@@ -67,6 +67,7 @@ public class GA_Settings : ScriptableObject
 	
 	public bool AllowRoaming = false;
 	public bool ArchiveData = false;
+	public Vector3 HeatmapGridSize = Vector3.one;
 
 	//bytes
 	public long ArchiveMaxFileSize = 2000;
@@ -148,7 +149,7 @@ public class GA_Settings : ScriptableObject
 	public IEnumerator CheckInternetConnectivity(bool startQueue)
 	{
 		// Application.internetReachability returns the type of Internet reachability currently possible on the device, but does not check if the there is an actual route to the network. So we can check this instantly.
-		if (Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork && !GA.Settings.AllowRoaming)
+		if (Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork && !GA.SettingsGA.AllowRoaming)
 		{
 			InternetConnectivity = false;
 		}
@@ -173,7 +174,7 @@ public class GA_Settings : ScriptableObject
 				else
 				{
 					//Get the JSON object from the response
-					Dictionary<string, object> returnParam = LitJson.JsonMapper.ToObject<Dictionary<string, object>>(www.text);
+					Hashtable returnParam = (Hashtable)MiniJSON.JsonDecode(www.text);
 					
 					//If the response contains the key "status" with the value "ok" we know that we are connected
 					if (returnParam != null && returnParam.ContainsKey("status") && returnParam["status"].ToString().Equals("ok"))

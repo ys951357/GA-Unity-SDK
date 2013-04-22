@@ -2,9 +2,14 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 [RequireComponent(typeof(GA_SpecialEvents))]
 [RequireComponent(typeof(GA_Gui))]
 
+[ExecuteInEditMode]
 public class GA_SystemTracker : MonoBehaviour {
 
 	#region public values
@@ -31,12 +36,27 @@ public class GA_SystemTracker : MonoBehaviour {
 	#endregion
 	
 	#region unity derived methods
-	 
+	
+	#if UNITY_EDITOR
+	void OnEnable ()
+	{
+		EditorApplication.hierarchyWindowItemOnGUI += GA.HierarchyWindowCallback;
+	}
+	
+	void OnDisable ()
+	{
+		EditorApplication.hierarchyWindowItemOnGUI -= GA.HierarchyWindowCallback;
+	}
+	#endif
+	
 	/// <summary>
 	/// Setup involving other components
 	/// </summary>
 	public void Start ()
 	{
+		if (!Application.isPlaying)
+			return;
+		
 		if (GA_SYSTEMTRACKER != null)
 		{
 			// only one system tracker allowed per scene
@@ -64,9 +84,9 @@ public class GA_SystemTracker : MonoBehaviour {
 		// Add system specs to the submit queue
 		if (IncludeSystemSpecs)
 		{
-			List<Dictionary<string, object>> systemspecs = GA.API.GenericInfo.GetGenericInfo("");
+			List<Hashtable> systemspecs = GA.API.GenericInfo.GetGenericInfo("");
 			
-			foreach (Dictionary<string, object> spec in systemspecs)
+			foreach (Hashtable spec in systemspecs)
 			{
 				GA_Queue.AddItem(spec, GA_Submit.CategoryType.GA_Log, false);
 			}
@@ -75,6 +95,9 @@ public class GA_SystemTracker : MonoBehaviour {
 	
 	void OnDestroy()
 	{
+		if (!Application.isPlaying)
+			return;
+		
 		if (GA_SYSTEMTRACKER == this)
 			GA_SYSTEMTRACKER = null;	
 	}

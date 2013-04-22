@@ -8,7 +8,7 @@ public class GA_Menu : MonoBehaviour
 	[MenuItem ("Window/GameAnalytics/Select GA_Settings", false, 0)]
 	static void SelectGASettings ()
 	{
-		Selection.activeObject = GA.Settings;
+		Selection.activeObject = GA.SettingsGA;
 	}
 	
 	[MenuItem ("Window/GameAnalytics/GA Setup Wizard", false, 100)]

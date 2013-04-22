@@ -113,6 +113,7 @@ public class GA_HeatMapInspector : Editor
 		heatmap.IgnoreDates = EditorGUILayout.Toggle(heatmap.IgnoreDates);
 		GUILayout.EndHorizontal();
 		
+#if UNITY_EDITOR
 		//Start Date
 		GUILayout.BeginHorizontal();
 		EditorGUILayout.LabelField("Start Date:", GUILayout.Width(155));
@@ -145,6 +146,7 @@ public class GA_HeatMapInspector : Editor
 		}
 
 		GUILayout.EndHorizontal();
+#endif
 		
 		EditorGUILayout.Space();
 		EditorGUILayout.Space();

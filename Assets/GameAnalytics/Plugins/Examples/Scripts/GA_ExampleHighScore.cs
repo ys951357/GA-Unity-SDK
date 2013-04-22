@@ -123,7 +123,7 @@ public class GA_ExampleHighScore : MonoBehaviour
 		
 		if (!genderComboBoxControl.IsShowingList())
 		{
-			GUI.DrawTexture(new Rect(126, 156, 55, 55), GA.Settings.Logo);
+			GUI.DrawTexture(new Rect(126, 156, 55, 55), GA.SettingsGA.Logo);
 		}
 		
 		GUI.FocusWindow(0);

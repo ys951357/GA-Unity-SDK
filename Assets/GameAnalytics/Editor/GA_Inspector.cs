@@ -13,11 +13,12 @@ using System;
 public class GA_Inspector : Editor
 {
 	private GUIContent _myPageLink				= new GUIContent("My Page", "Opens your home on the GameAnalytics web page");
-	private GUIContent _documentationLink		= new GUIContent("Help", "Opens the GameAnalytics Unity3D package documentation page in your browser. https://beta.gameanalytics.com/docs/unity3d.html");
+	private GUIContent _documentationLink		= new GUIContent("Help", "Opens the GameAnalytics Unity3D package documentation page in your browser.");
 	private GUIContent _checkForUpdates			= new GUIContent("Updates", "Checks if you have the newest version of the GameAnalytics Unity3D wrapper.");
 	private GUIContent _publicKeyLabel			= new GUIContent("Game Key", "Your GameAnalytics Game Key - copy/paste from the GA website.");
 	private GUIContent _privateKeyLabel			= new GUIContent("Secret Key", "Your GameAnalytics Secret Key - copy/paste from the GA website.");
 	private GUIContent _apiKeyLabel				= new GUIContent("API Key", "Your GameAnalytics API Key - copy/paste from the GA website. This key is used for retrieving data from the GA servers, f.x. when you want to generate heatmaps.");
+	private GUIContent _heatmapSizeLabel		= new GUIContent("Heatmap Grid Size", "The size in Unity units of each heatmap grid space. Data visualized as a heatmap must use the same grid size as was used when the data was collected, otherwise the visualization will be wrong.");
 	private GUIContent _build					= new GUIContent("Build", "The current version of the game. Updating the build name for each test version of the game will allow you to filter by build when viewing your data on the GA website.");
 	private GUIContent _debugMode				= new GUIContent("Debug Mode", "Show additional debug messages from GA in the unity editor console.");
 	private GUIContent _runInEditor				= new GUIContent("Run In Editor Play Mode", "Submit data to the GameAnalytics server while playing your game in the Unity editor.");
@@ -104,21 +105,21 @@ public class GA_Inspector : Editor
 		
 		GUILayout.BeginVertical();
 		
-		GUILayout.Label("GameAnalytics Unity Wrapper v." + GA_Settings.VERSION);
+		GUILayout.Label("GameAnalytics Unity SDK v." + GA_Settings.VERSION);
 		
 		GUILayout.BeginHorizontal();
 		
 		if (GUILayout.Button(_myPageLink, GUILayout.MaxWidth(65)))
 		{
-			Application.OpenURL("https://go.gameanalytics.com/home");
+			Application.OpenURL("http://easy.gameanalytics.com/LoginGA");
 		}
 		if (GUILayout.Button(_documentationLink, GUILayout.MaxWidth(65)))
 		{
-			Application.OpenURL("http://support.gameanalytics.com/home");
+			Application.OpenURL("http://easy.gameanalytics.com/SupportDocu");
 		}
 		if (GUILayout.Button(_checkForUpdates, GUILayout.MaxWidth(65)))
 		{
-			Application.OpenURL("http://support.gameanalytics.com/entries/22584741-Download-and-setup"); //http://u3d.as/content/game-analytics/game-analytics-unity-package
+			Application.OpenURL("http://easy.gameanalytics.com/DownloadSetup"); //http://u3d.as/content/game-analytics/game-analytics-unity-package
 		}
 		
 		GUILayout.EndHorizontal();
@@ -174,10 +175,6 @@ public class GA_Inspector : Editor
 		}
 		GUILayout.EndHorizontal();
 		
-		
-		
-		
-		
 		if(ga.CurrentInspectorState == GA_Settings.InspectorStates.Basic)
 		{
 			EditorGUILayout.Space();
@@ -232,6 +229,18 @@ public class GA_Inspector : Editor
 			
 			EditorGUILayout.Space();
 			
+			GUILayout.BeginHorizontal();
+		    GUILayout.Label("", GUILayout.Width(7));
+		    GUILayout.Label(_heatmapSizeLabel, GUILayout.Width(150));
+			GUILayout.EndHorizontal();
+			GUILayout.Space(-15);
+			ga.HeatmapGridSize = EditorGUILayout.Vector3Field("", ga.HeatmapGridSize);
+			if (ga.HeatmapGridSize != Vector3.one)
+			{
+				EditorGUILayout.HelpBox("Editing the heatmap grid size must be done BEFORE data is submitted, and you must use the same grid size when setting up your heatmaps. Otherwise the heatmap data will be incorrectly displayed.", MessageType.Warning);
+			}
+			
+			EditorGUILayout.Space();
 			
 			GUILayout.BeginHorizontal();
 		    GUILayout.Label("", GUILayout.Width(7));

@@ -43,27 +43,27 @@ public class GA_Business
 	/// </param>
 	private  void CreateNewEvent(string eventName, string currency, int amount, float? x, float? y, float? z)
 	{
-		Dictionary<string, object> parameters = new Dictionary<string, object>()
+		Hashtable parameters = new Hashtable()
 		{
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], eventName },
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Currency], currency },
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Amount], amount.ToString() },
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], GA.Settings.CustomArea.Equals(string.Empty)?Application.loadedLevelName:GA.Settings.CustomArea }
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], GA.SettingsGA.CustomArea.Equals(string.Empty)?Application.loadedLevelName:GA.SettingsGA.CustomArea }
 		};
 		
 		if (x.HasValue)
 		{
-			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.X], x.ToString());
+			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.X], (x*GA.SettingsGA.HeatmapGridSize.x).ToString());
 		}
 		
 		if (y.HasValue)
 		{
-			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Y], y.ToString());
+			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Y], (y*GA.SettingsGA.HeatmapGridSize.y).ToString());
 		}
 		
 		if (z.HasValue)
 		{
-			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Z], z.ToString());
+			parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Z], (z*GA.SettingsGA.HeatmapGridSize.z).ToString());
 		}
 		
 		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_Purchase, false);

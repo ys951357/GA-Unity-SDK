@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System;
 using System.Collections.Generic;
-using LitJson;
+//using LitJson;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -32,6 +32,7 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 	public bool BuildingHeatmap = false;
 	public float BuildHeatmapPercentage = 0;
 	
+#if UNITY_EDITOR || !UNITY_FLASH
 	//Pretty silly hack to force Unity to serialize DateTime. 
 	//(It makes sense that it doesn't serialize structs, but there might be a better workaround.
 	[SerializeField]
@@ -57,6 +58,7 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 		}
 		set {_endDateTime = value.HasValue?value.Value.ToString():"";}
 	}
+#endif
 	
 	[HideInInspector]
 	public List<string> AvailableAreas;
@@ -72,11 +74,17 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 	public GA_HeatmapData DataContainer;
 	[SerializeField]
 	private bool didInit = false;
-	
+
+#if UNITY_EDITOR || !UNITY_FLASH
 	private CombineHeatmapType _combineType = CombineHeatmapType.None;
+#endif
 	
 	public void OnEnable ()
-	{	
+	{
+#if UNITY_EDITOR
+		EditorApplication.hierarchyWindowItemOnGUI += GA.HierarchyWindowCallback;
+#endif
+		
 		if(didInit)
 			return;
 		
@@ -89,13 +97,21 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 		AvailableTypes.Add("Design");
 		AvailableTypes.Add("Quality");
 		AvailableTypes.Add("Business");
-
+		
+#if UNITY_EDITOR || !UNITY_FLASH
 		StartDateTime = DateTime.Now;
 		EndDateTime = DateTime.Now;
+#endif
 		
 		didInit = true;
 	}
-
+	
+#if UNITY_EDITOR
+	void OnDisable ()
+	{
+		EditorApplication.hierarchyWindowItemOnGUI -= GA.HierarchyWindowCallback;
+	}
+#endif
 	
 	void Awake()
 	{
@@ -148,7 +164,8 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 		}  
 	}
 	
-	public void OnSuccessDownload(GA_Request.RequestType requestType, JsonData jsonList, GA_Request.SubmitErrorHandler errorEvent)
+#if UNITY_EDITOR || !UNITY_FLASH
+	public void OnSuccessDownload(GA_Request.RequestType requestType, Hashtable jsonList, GA_Request.SubmitErrorHandler errorEvent)
 	{
 		DownloadingData = false;
 		BuildingHeatmap = true;
@@ -167,15 +184,19 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 		
 		List<GA_DataPoint> DPsToDelete = new List<GA_DataPoint>();
 		
-		for (int i = 0; i < jsonList["x"].Count; i++)
+		ArrayList jsonArrayX = (ArrayList)jsonList["x"];
+		ArrayList jsonArrayY = (ArrayList)jsonList["y"];
+		ArrayList jsonArrayZ = (ArrayList)jsonList["z"];
+		ArrayList jsonArrayValue = (ArrayList)jsonList["value"];
+		for (int i = 0; i < jsonArrayX.Count; i++)
 		{
 			try
 			{
 				bool done = false;
 				if (_combineType == CombineHeatmapType.Add)
 				{
-					Vector3 position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
-					int count = int.Parse(jsonList["value"][i].ToString());
+					Vector3 position = new Vector3(float.Parse(jsonArrayX[i].ToString()) / GA.SettingsGA.HeatmapGridSize.x, float.Parse(jsonArrayY[i].ToString()) / GA.SettingsGA.HeatmapGridSize.y, float.Parse(jsonArrayZ[i].ToString()) / GA.SettingsGA.HeatmapGridSize.z);
+					int count = int.Parse(jsonArrayValue[i].ToString());
 					
 					for (int u = 0; u < DataContainer.Data.Count; u++)
 					{
@@ -189,8 +210,8 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 				}
 				else if (_combineType == CombineHeatmapType.Subtract)
 				{
-					Vector3 position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
-					int count = int.Parse(jsonList["value"][i].ToString());
+					Vector3 position = new Vector3(float.Parse(jsonArrayX[i].ToString()) / GA.SettingsGA.HeatmapGridSize.x, float.Parse(jsonArrayY[i].ToString()) / GA.SettingsGA.HeatmapGridSize.y, float.Parse(jsonArrayZ[i].ToString()) / GA.SettingsGA.HeatmapGridSize.z);
+					int count = int.Parse(jsonArrayValue[i].ToString());
 					
 					for (int u = 0; u < DataContainer.Data.Count; u++)
 					{
@@ -207,8 +228,8 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 				{
 					done = true;
 					
-					Vector3 position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
-					int count = int.Parse(jsonList["value"][i].ToString());
+					Vector3 position = new Vector3(float.Parse(jsonArrayX[i].ToString()) / GA.SettingsGA.HeatmapGridSize.x, float.Parse(jsonArrayY[i].ToString()) / GA.SettingsGA.HeatmapGridSize.y, float.Parse(jsonArrayZ[i].ToString()) / GA.SettingsGA.HeatmapGridSize.z);
+					int count = int.Parse(jsonArrayValue[i].ToString());
 					
 					for (int u = 0; u < DataContainer.Data.Count; u++)
 					{
@@ -227,15 +248,15 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 				if (_combineType == CombineHeatmapType.Subtract && !done)
 				{
 					GA_DataPoint p = new GA_DataPoint();
-					p.position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
-					p.count = -(int.Parse(jsonList["value"][i].ToString()));
+					p.position = new Vector3(float.Parse(jsonArrayX[i].ToString()) / GA.SettingsGA.HeatmapGridSize.x, float.Parse(jsonArrayY[i].ToString()) / GA.SettingsGA.HeatmapGridSize.y, float.Parse(jsonArrayZ[i].ToString()) / GA.SettingsGA.HeatmapGridSize.z);
+					p.count = -(int.Parse(jsonArrayValue[i].ToString()));
 					DataContainer.Data.Add(p);
 				}
 				else if (_combineType != CombineHeatmapType.Subtract && (_combineType == CombineHeatmapType.None || !done))
 				{
 					GA_DataPoint p = new GA_DataPoint();
-					p.position = new Vector3(float.Parse(jsonList["x"][i].ToString()), float.Parse(jsonList["y"][i].ToString()), float.Parse(jsonList["z"][i].ToString()));
-					p.count = int.Parse(jsonList["value"][i].ToString());
+					p.position = new Vector3(float.Parse(jsonArrayX[i].ToString()) / GA.SettingsGA.HeatmapGridSize.x, float.Parse(jsonArrayY[i].ToString()) / GA.SettingsGA.HeatmapGridSize.y, float.Parse(jsonArrayZ[i].ToString()) / GA.SettingsGA.HeatmapGridSize.z);
+					p.count = int.Parse(jsonArrayValue[i].ToString());
 					DataContainer.Data.Add(p);
 				}
 			} 
@@ -244,7 +265,7 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 				// JSON format error
 				GA.LogError("GameAnalytics: Error in parsing JSON data from server - " + e.Message);
 			}
-			BuildHeatmapPercentage = (i * 100) / jsonList["x"].Count;
+			BuildHeatmapPercentage = (i * 100) / jsonArrayX.Count;
 		}
 		foreach (GA_DataPoint dp in DPsToDelete)
 		{
@@ -259,19 +280,23 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 		GetComponent<GA_HeatMapRenderer>().OnDataUpdate();
 		Loading = false;
 	}
-
+#endif
+	
 	public void OnErrorDownload(string msg)
 	{
 		GA.Log("GameAnalytics: Download failed: "+msg);
+		DownloadingData = false;
 		Loading = false;
 	}
-	
+
+#if UNITY_EDITOR || !UNITY_FLASH
 	public void SetCombineHeatmapType(CombineHeatmapType combineType)
 	{
 		_combineType = combineType;
 	}
+#endif
 	
-	public  void DownloadData()
+	public void DownloadData()
 	{
 		DownloadingData = true;
 		
@@ -297,10 +322,16 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 			cancel = true;
 		}
 		
-		if(cancel)
+		if (cancel)
+		{
+			DownloadingData = false;
 			return;
+		}
 		
+		
+#if UNITY_EDITOR || !UNITY_FLASH
 		GA.API.Request.RequestHeatmapData(events, AvailableAreas[CurrentAreaIndex],IgnoreDates?null:StartDateTime,IgnoreDates?null:EndDateTime, OnSuccessDownload, OnErrorDownload);
+#endif
 	}
 	
 	// Update is called once per frame
@@ -309,7 +340,8 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 		DownloadData();
 	}
 	
-	public void OnSuccessDownloadInfo(GA_Request.RequestType requestType, JsonData jsonList, GA_Request.SubmitErrorHandler errorEvent)
+#if UNITY_EDITOR || !UNITY_FLASH
+	public void OnSuccessDownloadInfo(GA_Request.RequestType requestType, Hashtable jsonList, GA_Request.SubmitErrorHandler errorEvent)
 	{
 		GA.Log("Succesful index downloaded");
 		CurrentAreaIndex = 0;
@@ -323,12 +355,13 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 		AvailableBuilds = new List<string>();
 		IgnoreDates = true;
 	
-		for (int i = 0; i < jsonList["event_id"].Count; i++)
+		ArrayList jsonArrayEventID = (ArrayList)jsonList["event_id"];
+		for (int i = 0; i < jsonArrayEventID.Count; i++)
 		{
 			try
 			{
 				string name;
-				name = jsonList["event_id"][i].ToString();
+				name = jsonArrayEventID[i].ToString();
 				AvailableEvents.Add(name);	
 				CurrentEventFlag.Add(false);
 				
@@ -340,13 +373,13 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 			}
 		}
 		
-
-		for (int j = 0; j < jsonList["area"].Count; j++)
+		ArrayList jsonArrayArea = (ArrayList)jsonList["area"];
+		for (int j = 0; j < jsonArrayArea.Count; j++)
 		{
 			try
 			{
 				string name;
-				name = jsonList["area"][j].ToString();
+				name = jsonArrayArea[j].ToString();
 				AvailableAreas.Add(name);		
 				
 			}
@@ -357,13 +390,13 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 			}
 		}
 		
-		
-		for (int k = 0; k < jsonList["build"].Count; k++)
+		ArrayList jsonArrayBuild = (ArrayList)jsonList["build"];
+		for (int k = 0; k < jsonArrayBuild.Count; k++)
 		{
 			try
 			{
 				string name;
-				name = jsonList["build"][k].ToString();
+				name = jsonArrayBuild[k].ToString();
 				AvailableBuilds.Add(name);		
 				
 			}
@@ -385,4 +418,5 @@ public class GA_HeatMapDataFilter : GA_HeatMapDataFilterBase
 		GA.Log("Downloading index from server");
 		GA.API.Request.RequestGameInfo(OnSuccessDownloadInfo, OnErrorDownloadInfo);
 	}
+#endif
 }

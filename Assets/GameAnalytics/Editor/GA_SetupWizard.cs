@@ -71,7 +71,7 @@ public class GA_SetupWizard : EditorWindow
 			EditorGUILayout.LabelField("Visit the online documentation:", EditorStyles.boldLabel);
 			if (GUILayout.Button(_documentationLink, GUILayout.Width(150)))
 			{
-				Application.OpenURL("http://support.gameanalytics.com/home");
+				Application.OpenURL("http://easy.gameanalytics.com/SupportDocu");
 			}
 			EditorGUILayout.EndHorizontal();
 			
@@ -93,7 +93,7 @@ public class GA_SetupWizard : EditorWindow
 			EditorGUILayout.LabelField("GA account creation website:", EditorStyles.boldLabel);
 			if (GUILayout.Button(_myHomePage, GUILayout.Width(150)))
 			{
-				Application.OpenURL("https://go.gameanalytics.com/home/");
+				Application.OpenURL("http://easy.gameanalytics.com/CreateGameAnalytics");
 			}
 			EditorGUILayout.EndHorizontal();
 			
@@ -117,7 +117,7 @@ public class GA_SetupWizard : EditorWindow
 			EditorGUILayout.LabelField("GA account home:", EditorStyles.boldLabel);
 			if (GUILayout.Button(_myHomePage, GUILayout.Width(150)))
 			{
-				Application.OpenURL("https://go.gameanalytics.com/home/");
+				Application.OpenURL("http://easy.gameanalytics.com/LoginGA");
 			}
 			EditorGUILayout.EndHorizontal();
 			
@@ -125,12 +125,12 @@ public class GA_SetupWizard : EditorWindow
 			
 			GUILayout.BeginHorizontal();
 		    GUILayout.Label(_publicKeyLabel, EditorStyles.boldLabel);
-			GA.Settings.GameKey = EditorGUILayout.TextField("", GA.Settings.GameKey);
+			GA.SettingsGA.GameKey = EditorGUILayout.TextField("", GA.SettingsGA.GameKey);
 			GUILayout.EndHorizontal();
 			
 			GUILayout.BeginHorizontal();
 		    GUILayout.Label(_privateKeyLabel, EditorStyles.boldLabel);
-			GA.Settings.SecretKey = EditorGUILayout.TextField("", GA.Settings.SecretKey);
+			GA.SettingsGA.SecretKey = EditorGUILayout.TextField("", GA.SettingsGA.SecretKey);
 			GUILayout.EndHorizontal();
 			
 			EditorGUILayout.Space();
@@ -246,7 +246,7 @@ public class GA_SetupWizard : EditorWindow
 			EditorGUILayout.LabelField("Visit the online documentation:", EditorStyles.boldLabel);
 			if (GUILayout.Button(_documentationLink, GUILayout.Width(150)))
 			{
-				Application.OpenURL("http://support.gameanalytics.com/home");
+				Application.OpenURL("http://easy.gameanalytics.com/SupportDocu");
 			}
 			EditorGUILayout.EndHorizontal();
 			
@@ -264,7 +264,7 @@ public class GA_SetupWizard : EditorWindow
 			EditorGUILayout.LabelField("GA account home:", EditorStyles.boldLabel);
 			if (GUILayout.Button(_myHomePage, GUILayout.Width(150)))
 			{
-				Application.OpenURL("https://go.gameanalytics.com/home/");
+				Application.OpenURL("http://easy.gameanalytics.com/LoginGA");
 			}
 			EditorGUILayout.EndHorizontal();
 			
@@ -272,7 +272,7 @@ public class GA_SetupWizard : EditorWindow
 			
 			GUILayout.BeginHorizontal();
 		    GUILayout.Label(_apiKeyLabel, EditorStyles.boldLabel);
-			GA.Settings.ApiKey = EditorGUILayout.TextField("", GA.Settings.ApiKey);
+			GA.SettingsGA.ApiKey = EditorGUILayout.TextField("", GA.SettingsGA.ApiKey);
 			GUILayout.EndHorizontal();
 			
 			GUILayout.Space(3);
@@ -318,7 +318,7 @@ public class GA_SetupWizard : EditorWindow
 			EditorGUILayout.LabelField("Visit your GA home page:", EditorStyles.boldLabel);
 			if (GUILayout.Button(_myHomePage, GUILayout.Width(150)))
 			{
-				Application.OpenURL("https://go.gameanalytics.com/home/");
+				Application.OpenURL("http://easy.gameanalytics.com/LoginGA");
 			}
 			EditorGUILayout.EndHorizontal();
 			
@@ -328,7 +328,7 @@ public class GA_SetupWizard : EditorWindow
 			EditorGUILayout.LabelField("Visit the online documentation:", EditorStyles.boldLabel);
 			if (GUILayout.Button(_documentationLink, GUILayout.Width(150)))
 			{
-				Application.OpenURL("http://support.gameanalytics.com/home");
+				Application.OpenURL("http://easy.gameanalytics.com/SupportDocu");
 			}
 			EditorGUILayout.EndHorizontal();
 			
@@ -385,13 +385,13 @@ public class GA_SetupWizard : EditorWindow
 	{
 		if (_tourStep == 2)
 		{
-			Selection.activeObject = GA.Settings;
-			GA.Settings.CurrentInspectorState = GA_Settings.InspectorStates.Basic;
+			Selection.activeObject = GA.SettingsGA;
+			GA.SettingsGA.CurrentInspectorState = GA_Settings.InspectorStates.Basic;
 		}
 		else if (_tourStep == 7)
 		{
-			Selection.activeObject = GA.Settings;
-			GA.Settings.CurrentInspectorState = GA_Settings.InspectorStates.Pref;
+			Selection.activeObject = GA.SettingsGA;
+			GA.SettingsGA.CurrentInspectorState = GA_Settings.InspectorStates.Pref;
 		}
 	}
 }

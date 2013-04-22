@@ -13,17 +13,32 @@ using System;
 public class GA_TrackerInspector : Editor
 {
 	private GUIContent _eventFoldOut = new GUIContent("Auto-tracked Events", "The events you can track automatically.");
-	private GUIContent _trackTargetFoldOut = new GUIContent("Track Target", "Use this objects location when tracking default events, such as critical FPS events. Only one object per scene can be set to track target.");
+	private GUIContent _trackTarget = new GUIContent("Track Target", "Use this objects location when tracking default events, such as critical FPS events. Only one object per scene can be set to track target.");
+	private GUIContent _showGizmo = new GUIContent("Editor Scene Gizmo", "Show a GA gizmo in the scene view for this GA_Tracker.");
 	
 	override public void OnInspectorGUI ()
 	{
 		GA_Tracker gaTracker = target as GA_Tracker;
 		
+		bool showGizmo = gaTracker.ShowGizmo;
+		
+		GUILayout.BeginHorizontal();
+		GUILayout.Label("", GUILayout.Width(7));
+		GUILayout.Label(_showGizmo, GUILayout.Width(150));
+		gaTracker.ShowGizmo = EditorGUILayout.Toggle("", gaTracker.ShowGizmo);
+		GUILayout.EndHorizontal();
+		
+		if (gaTracker.ShowGizmo != showGizmo)
+		{
+			EditorApplication.RepaintHierarchyWindow();
+			SceneView.RepaintAll();
+		}
+		
 		bool trackTargetValue = gaTracker.TrackTarget;
 		
 		GUILayout.BeginHorizontal();
 		GUILayout.Label("", GUILayout.Width(7));
-		GUILayout.Label(_trackTargetFoldOut, GUILayout.Width(150));
+		GUILayout.Label(_trackTarget, GUILayout.Width(150));
 		trackTargetValue = EditorGUILayout.Toggle("", gaTracker.TrackTarget);
 		GUILayout.EndHorizontal();
 		
@@ -52,7 +67,14 @@ public class GA_TrackerInspector : Editor
 				GUILayout.BeginHorizontal();
 			    GUILayout.Label("", GUILayout.Width(27));
 			    GUILayout.Label(new GUIContent(eventType.ToString(), GA_Tracker.EventTooltips[eventType]), GUILayout.Width(150));
-				eventSelected = EditorGUILayout.Toggle("", eventSelected);
+				eventSelected = EditorGUILayout.Toggle("", eventSelected, GUILayout.Width(27));
+				
+				if (i == 0)
+				{
+					gaTracker.BreadCrumbTrackInterval = EditorGUILayout.FloatField(gaTracker.BreadCrumbTrackInterval, GUILayout.Width(27));
+					gaTracker.BreadCrumbTrackInterval = Mathf.Max(1.0f, gaTracker.BreadCrumbTrackInterval);
+				}
+				
 				GUILayout.EndHorizontal();
 				
 				if (eventSelected && !gaTracker.TrackedEvents.Contains(eventType))

@@ -6,11 +6,14 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Text;
 using System;
-using LitJson;
+//using LitJson;
 using System.Linq;
+
+#if !UNITY_FLASH
+using System.Security.Cryptography;
+#endif
 
 public class GA_Submit
 {	
@@ -31,7 +34,7 @@ public class GA_Submit
 	public struct Item
 	{
 		public CategoryType Type;
-		public Dictionary<string, object> Parameters;
+		public Hashtable Parameters;
 		public float AddTime;
 		public int Count;
 	}
@@ -39,13 +42,7 @@ public class GA_Submit
 	/// <summary>
 	/// All the different types of GA services
 	/// </summary>
-	public Dictionary<CategoryType, string> Categories = new Dictionary<CategoryType, string>()
-	{
-		{ CategoryType.GA_User, "user" },
-		{ CategoryType.GA_Event, "design" },
-		{ CategoryType.GA_Log, "quality" },
-		{ CategoryType.GA_Purchase, "business" }
-	};
+	public Dictionary<CategoryType, string> Categories;
 	
 	#region private values
 	
@@ -71,6 +68,14 @@ public class GA_Submit
 	{
 		_publicKey = publicKey;
 		_privateKey = privateKey;
+		
+		Categories = new Dictionary<CategoryType, string>()
+		{
+			{ CategoryType.GA_User, "user" },
+			{ CategoryType.GA_Event, "design" },
+			{ CategoryType.GA_Log, "quality" },
+			{ CategoryType.GA_Purchase, "business" }
+		};
 	}
 	
 	/// <summary>
@@ -128,7 +133,7 @@ public class GA_Submit
 					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID], GA.API.GenericInfo.SessionID);
 				
 				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]))
-					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.Settings.Build);
+					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.SettingsGA.Build);
 				
 				categories[item.Type].Add(item);
 			}
@@ -144,7 +149,7 @@ public class GA_Submit
 					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID], GA.API.GenericInfo.SessionID);
 				
 				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]))
-					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.Settings.Build);
+					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.SettingsGA.Build);
 				
 				categories.Add(item.Type, new List<Item> { item });
 			}
@@ -185,7 +190,7 @@ public class GA_Submit
 			string url = GetURL(Categories[serviceType]);
 			
 			//Make sure that all items are of the same category type, and put all the parameter collections into a list
-			List<Dictionary<string, object>> itemsParameters = new List<Dictionary<string, object>>();
+			List<Hashtable> itemsParameters = new List<Hashtable>();
 			
 			for (int i = 0; i < items.Count; i++)
 			{
@@ -206,7 +211,7 @@ public class GA_Submit
 				else if (items[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]] == null)
 					items[i].Parameters[GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.UserID]] = GA.API.GenericInfo.UserID;
 				
-				Dictionary<string, object> parameters;
+				Hashtable parameters;
 				
 				if (items[i].Count > 1)
 				{
@@ -227,9 +232,9 @@ public class GA_Submit
 			
 			/* If we do not have access to a network connection (or we are roaming (mobile devices) and GA_static_api.Settings.ALLOWROAMING is false),
 			 * and data is set to be archived, then archive the data and pretend the message was sent successfully */
-			if  (GA.Settings.ArchiveData && !GA.Settings.InternetConnectivity)
+			if  (GA.SettingsGA.ArchiveData && !GA.SettingsGA.InternetConnectivity)
 			{
-				if (GA.Settings.DebugMode)
+				if (GA.SettingsGA.DebugMode)
 				{
 					GA.Log("GA: Archiving data (no network connection).");
 				}
@@ -241,7 +246,7 @@ public class GA_Submit
 				}
 				yield break;
 			}
-			else if (!GA.Settings.InternetConnectivity)
+			else if (!GA.SettingsGA.InternetConnectivity)
 			{
 				GA.LogWarning("GA Error: No network connection.");
 				if (errorEvent != null)
@@ -261,13 +266,15 @@ public class GA_Submit
 			//Try to send the data
 			WWW www = new WWW(url, data, headers);
 			
+			#if !UNITY_FLASH
 			//Set thread priority low
 			www.threadPriority = ThreadPriority.Low;
+			#endif
 			
 			//Wait for response
 			yield return www;
 			
-			if (GA.Settings.DebugMode)
+			if (GA.SettingsGA.DebugMode)
 			{
 				GA.Log("GA URL: " + url);
 				GA.Log("GA Submit: " + json);
@@ -282,14 +289,14 @@ public class GA_Submit
 				}
 				
 				//Get the JSON object from the response
-				Dictionary<string, object> returnParam = JsonMapper.ToObject<Dictionary<string, object>>(www.text);
+				Hashtable returnParam = (Hashtable)MiniJSON.JsonDecode(www.text);
 				
 				//If the response contains the key "status" with the value "ok" we know that the message was sent and recieved successfully
 				if ((returnParam != null &&
 				    returnParam.ContainsKey("status") && returnParam["status"].ToString().Equals("ok")) ||
 					CheckServerReply(www))
 				{
-					if (GA.Settings.DebugMode)
+					if (GA.SettingsGA.DebugMode)
 					{
 						GA.Log("GA Result: " + www.text);
 					}
@@ -394,6 +401,8 @@ public class GA_Submit
 	/// </returns>
 	public string CreateMD5Hash(string input)
 	{
+		#if !UNITY_FLASH
+		
 		// Gets the MD5 hash for input
 		MD5 md5 = new MD5CryptoServiceProvider();
 		byte[] data = Encoding.Default.GetBytes(input);
@@ -405,6 +414,12 @@ public class GA_Submit
 		}
 		// Returns MD5 hexa hash as string
 		return hexaHash;
+		
+		#else
+		
+		return MD5Wrapper.Md5Sum(input);
+		
+		#endif
 	}
 	
 	/// <summary>
@@ -416,8 +431,10 @@ public class GA_Submit
 	/// <returns>
 	/// The MD5 hash encoded result of input <see cref="System.String"/>
 	/// </returns>
-	public string CreateMD5Hash(byte[] input)
+	/*public string CreateMD5Hash(byte[] input)
 	{
+		#if !UNITY_FLASH
+		
 		// Gets the MD5 hash for input
 		MD5 md5 = new MD5CryptoServiceProvider();
 		byte[] hash = md5.ComputeHash(input);
@@ -428,7 +445,14 @@ public class GA_Submit
 		}
 		// Returns MD5 hexa hash as string
 		return hexaHash;
-	}
+		
+		#else
+		
+		return MD5Wrapper.Md5Sum(input.ToString());
+		
+		#endif
+	}*/
+	
 	
 	/// <summary>
 	/// Encodes the input as a sha1 hash
@@ -439,6 +463,7 @@ public class GA_Submit
 	/// <returns>
 	/// The sha1 hash encoded result of input <see cref="System.String"/>
 	/// </returns>
+	#if !UNITY_FLASH
 	public string CreateSha1Hash(string input)
 	{
 		// Gets the sha1 hash for input
@@ -453,6 +478,8 @@ public class GA_Submit
 	{
 		return _privateKey;
 	}
+	
+	#endif
 	
 	#endregion
 	
@@ -469,29 +496,36 @@ public class GA_Submit
 	/// </returns>
 	public bool CheckServerReply(WWW www)
 	{
-		if (www.error != null)
+		try
 		{
-			string errStart = www.error.Substring(0, 3);
-			if (errStart.Equals("201") || errStart.Equals("202") || errStart.Equals("203") || errStart.Equals("204") || errStart.Equals("205") || errStart.Equals("206"))
-				return true;
-		}
-		
-		if (!www.responseHeaders.ContainsKey("STATUS"))
+			if (www.error != null)
+			{
+				string errStart = www.error.Substring(0, 3);
+				if (errStart.Equals("201") || errStart.Equals("202") || errStart.Equals("203") || errStart.Equals("204") || errStart.Equals("205") || errStart.Equals("206"))
+					return true;
+			}
+			
+			if (!www.responseHeaders.ContainsKey("STATUS"))
+				return false;
+			
+			string status = www.responseHeaders["STATUS"];
+			
+			string[] splitStatus = status.Split(' ');
+			
+			int responseCode;
+			
+			if (splitStatus.Length > 1 && int.TryParse(splitStatus[1], out responseCode))
+			{
+				if (responseCode >= 200 && responseCode < 300)
+					return true;
+			}
+			
 			return false;
-		
-		string status = www.responseHeaders["STATUS"];
-		
-		string[] splitStatus = status.Split(' ');
-		
-		int responseCode;
-		
-		if (splitStatus.Length > 1 && int.TryParse(splitStatus[1], out responseCode))
-		{
-			if (responseCode >= 200 && responseCode < 300)
-				return true;
 		}
-		
-		return false;
+		catch
+		{
+			return false;
+		}
 	}
 	
 	#endregion
@@ -505,7 +539,7 @@ public class GA_Submit
 	/// <param name='list'>
 	/// List.
 	/// </param>
-	public static string DictToJson(List<Dictionary<string, object>> list)
+	public static string DictToJson(List<Hashtable> list)
 	{
 		StringBuilder b = new StringBuilder("[");
 		int d = 0;

@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using UnityEditor;
 #endif
 
-
 [ExecuteInEditMode]
 public class GA_HeatMapRenderer : MonoBehaviour
 {

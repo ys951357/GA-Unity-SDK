@@ -53,7 +53,7 @@ public class GA_ExampleTutorial : EditorWindow
 			EditorGUILayout.LabelField("Visit the online documentation:", EditorStyles.boldLabel);
 			if (GUILayout.Button(_documentationLink, GUILayout.Width(150)))
 			{
-				Application.OpenURL("http://support.gameanalytics.com/home");
+				Application.OpenURL("http://easy.gameanalytics.com/SupportDocu");
 			}
 			EditorGUILayout.EndHorizontal();
 			
@@ -216,7 +216,7 @@ public class GA_ExampleTutorial : EditorWindow
 			EditorGUILayout.LabelField("Visit the online documentation:", EditorStyles.boldLabel);
 			if (GUILayout.Button(_documentationLink, GUILayout.Width(150)))
 			{
-				Application.OpenURL("http://support.gameanalytics.com/home");
+				Application.OpenURL("http://easy.gameanalytics.com/SupportDocu");
 			}
 			EditorGUILayout.EndHorizontal();
 			

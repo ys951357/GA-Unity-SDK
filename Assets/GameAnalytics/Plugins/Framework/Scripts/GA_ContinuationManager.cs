@@ -22,20 +22,18 @@ public static class GA_ContinuationManager
 		public Func<bool> Done {get; private set;}
         public Action ContinueWith { get; private set; }
     }
-
+	
+	#if UNITY_EDITOR
     private static readonly List<EditorCoroutine> jobs = new List<EditorCoroutine>();
 
     public static void StartCoroutine(IEnumerator routine,Func<bool> done)
     {
-		#if UNITY_EDITOR
         if (!jobs.Any()) EditorApplication.update += Update;
        		jobs.Add(new EditorCoroutine(routine,done));
-		#endif
     }
 
     private static void Update()
     {
-		#if UNITY_EDITOR
         for (int i = jobs.Count-1; i>=0; --i)
         {
             var jobIt = jobs[i];
@@ -46,6 +44,6 @@ public static class GA_ContinuationManager
             }
         }
         if (!jobs.Any()) EditorApplication.update -= Update;
-		#endif
     }
+	#endif
 }

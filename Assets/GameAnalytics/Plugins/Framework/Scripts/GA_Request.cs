@@ -1,3 +1,5 @@
+#if UNITY_EDITOR || !UNITY_FLASH
+
 /// <summary>
 /// This class handles receiving data from the Game Analytics servers.
 /// JSON data is sent using a MD5 hashed authorization header, containing the JSON data and private key. Data received must be in JSON format also.
@@ -8,14 +10,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System;
-using LitJson;
+//using LitJson;
 
 public class GA_Request
 {
 	/// <summary>
 	/// Handlers for success and fail regarding requests sent to the GA server
 	/// </summary>
-	public delegate void SubmitSuccessHandler(RequestType requestType, JsonData returnParam, SubmitErrorHandler errorEvent);
+	public delegate void SubmitSuccessHandler(RequestType requestType, Hashtable returnParam, SubmitErrorHandler errorEvent);
 	public delegate void SubmitErrorHandler(string message);
 	
 	/// <summary>
@@ -42,7 +44,7 @@ public class GA_Request
 	
 	public WWW RequestGameInfo(SubmitSuccessHandler successEvent, SubmitErrorHandler errorEvent)
 	{ 
-		string game_key = GA.Settings.GameKey;
+		string game_key = GA.SettingsGA.GameKey;
 		
 		string requestInfo = "game_key=" + game_key + "&keys=area%7Cevent_id%7Cbuild";
 		
@@ -55,7 +57,7 @@ public class GA_Request
 		
 		//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
 		Hashtable headers = new Hashtable();
-		headers.Add("Authorization", GA.API.Submit.CreateMD5Hash(requestInfo + GA.Settings.ApiKey));
+		headers.Add("Authorization", GA.API.Submit.CreateMD5Hash(requestInfo + GA.SettingsGA.ApiKey));
 		
 		//Try to send the data
 		WWW www = new WWW(url, new byte[] { 0 }, headers);
@@ -72,7 +74,7 @@ public class GA_Request
 	
 	public WWW RequestHeatmapData(List<string> events, string area, DateTime? startDate, DateTime? endDate, SubmitSuccessHandler successEvent, SubmitErrorHandler errorEvent)
 	{
-		string game_key = GA.Settings.GameKey;
+		string game_key = GA.SettingsGA.GameKey;
 		string event_ids = "";
 		
 		for (int i = 0; i < events.Count; i++)
@@ -102,7 +104,7 @@ public class GA_Request
 		
 		//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
 		Hashtable headers = new Hashtable();
-		headers.Add("Authorization", GA.API.Submit.CreateMD5Hash(requestInfo + GA.Settings.ApiKey));
+		headers.Add("Authorization", GA.API.Submit.CreateMD5Hash(requestInfo + GA.SettingsGA.ApiKey));
 		
 		//Try to send the data
 		WWW www = new WWW(url, new byte[] { 0 }, headers);
@@ -137,7 +139,7 @@ public class GA_Request
 			//Get the JSON object from the response
 			string text = www.text;
 			text = text.Replace("null","0");
-			JsonData returnParam = JsonMapper.ToObject(text);
+			Hashtable returnParam = (Hashtable)MiniJSON.JsonDecode(text);
 			
 			if (returnParam != null)
 			{
@@ -180,3 +182,5 @@ public class GA_Request
 	
 	#endregion
 }
+
+#endif

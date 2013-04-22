@@ -2,6 +2,16 @@
 
 ### Recent Changes:
 
+##### v.0.4.0:
+
+- Added Flash Player support. As a result many code optimisations have been made, which should also improve performance even more on other platforms.
+- Added GameAnalytics gizmos and logos to GA objects, for easier identification in the hierarchy and scene view.
+- Fixed an issue with building to iOS with the Stripping Level "Use micro mscorlib". Please see the iOS considerations here: https://gameanalytics.zendesk.com/entries/23064016-Tips#player
+- GA_HeatMap: Added a grid size for heatmaps under the advanced tab of GA_Settings. Data must be visualised with the same grid size as is used during collection.
+- GA_HeatMap: Fixed an issue where the download button would not be re-enabled if the download failed.
+- GA_HeatMap: Fixed an issue where heatmap histograms with too low sample count would look weird.
+- GA_Tracker: Added custom interval to BreadCrumb event
+
 ##### v.0.3.7:
 
 - Minor bug fixes.

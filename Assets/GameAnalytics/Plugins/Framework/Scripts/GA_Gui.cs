@@ -61,7 +61,7 @@ public class GA_Gui : MonoBehaviour
 			switch (_windowType)
 			{
 				case WindowType.None:
-					if (GUI.Button(new Rect(Screen.width - 55, Screen.height - 55, 50, 50), GA.Settings.Logo))
+					if (GUI.Button(new Rect(Screen.width - 55, Screen.height - 55, 50, 50), GA.SettingsGA.Logo))
 					{
 						_windowType = WindowType.MessageTypeWindow;
 					}
@@ -151,8 +151,8 @@ public class GA_Gui : MonoBehaviour
 			if (_topic.Length > 0 && _details.Length > 0)
 			{
 				Vector3 target = Vector3.zero;
-				if (GA.Settings.TrackTarget != null)
-					target = GA.Settings.TrackTarget.position;
+				if (GA.SettingsGA.TrackTarget != null)
+					target = GA.SettingsGA.TrackTarget.position;
 				
 				GA.API.Quality.NewEvent("Feedback:"+_topic, _details, target.x, target.y, target.z);
 				
@@ -217,8 +217,8 @@ public class GA_Gui : MonoBehaviour
 			if (_topic.Length > 0 && _details.Length > 0)
 			{
 				Vector3 target = Vector3.zero;
-				if (GA.Settings.TrackTarget != null)
-					target = GA.Settings.TrackTarget.position;
+				if (GA.SettingsGA.TrackTarget != null)
+					target = GA.SettingsGA.TrackTarget.position;
 				
 				if (_popUpError)
 					GA.API.Debugging.SubmitError("Crash Report:"+_topic, _details);

@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System;
 using System.Net;
 
-#if !UNITY_WEBPLAYER
+#if !UNITY_WEBPLAYER && !UNITY_NACL && !UNITY_FLASH
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,6 +17,14 @@ using System.Text;
 
 public  class GA_GenericInfo
 {
+	/*#if UNITY_IPHONE && !UNITY_EDITOR
+	[DllImport ("__Internal")]
+	private static extern bool IsTrackingEnabled ();
+	
+	[DllImport ("__Internal")]
+	private static extern string GetTrackingID ();
+	#endif*/
+	
 	#region public values
 	
 	/// <summary>
@@ -25,7 +33,7 @@ public  class GA_GenericInfo
 	public  string UserID
 	{
 		get {
-			if (_userID == null && !GA.Settings.CustomUserID)
+			if (_userID == null && !GA.SettingsGA.CustomUserID)
 			{
 				if (PlayerPrefs.HasKey("GA_uid"))
 				{
@@ -59,18 +67,18 @@ public  class GA_GenericInfo
 	/// <summary>
 	/// The current UTC date/time in seconds
 	/// </summary>
-	public  string TimeStamp
+	/*public  string TimeStamp
 	{
 		get {
 			return ((DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000).ToString();
 		}
-	}
+	}*/
 	
 	#endregion
 	
 	#region private values
 	
-	private  string _userID;
+	private  string _userID = string.Empty;
 	private  string _sessionID;
 	private  bool _settingUserID;
 	
@@ -87,9 +95,9 @@ public  class GA_GenericInfo
 	/// <returns>
 	/// The message to submit to the GA server is a dictionary of all the relevant parameters (containing user ID, session ID, system information, language information, date/time, build version) <see cref="Dictionary<System.String, System.Object>"/>
 	/// </returns>
-	public  List<Dictionary<string, object>> GetGenericInfo(string message)
+	public  List<Hashtable> GetGenericInfo(string message)
 	{
-		List<Dictionary<string, object>> systemspecs = new List<Dictionary<string, object>>();
+		List<Hashtable> systemspecs = new List<Hashtable>();
 		
 		/*
 		 * Apple does not allow tracking of device specific data:
@@ -139,11 +147,19 @@ public  class GA_GenericInfo
 	/// </returns>
 	public  string GetUserUUID()
 	{
-		#if UNITY_WEBPLAYER
+		/*#if UNITY_IPHONE && !UNITY_EDITOR
+		
+		Debug.Log("iOS tracking enabled: " + IsTrackingEnabled ());
+		Debug.Log("iOS tracking ID: " + GetTrackingID ());
+		
+		return GetTrackingID ();
+		
+		#el*/
+		#if UNITY_WEBPLAYER || UNITY_NACL
 		
 		return SystemInfo.deviceUniqueIdentifier;
 		
-		#else
+		#elif !UNITY_FLASH
 		
 		try
 		{
@@ -167,6 +183,10 @@ public  class GA_GenericInfo
 			return SystemInfo.deviceUniqueIdentifier;
 		}
 		
+		#else
+		
+		return GetSessionUUID();
+		
 		#endif
 	}
 	
@@ -178,7 +198,16 @@ public  class GA_GenericInfo
 	/// </returns>
 	public  string GetSessionUUID()
 	{
+#if !UNITY_FLASH
 		return Guid.NewGuid().ToString();
+#else
+		string returnValue = "";
+		for (int i = 0; i < 12; i++)
+		{
+			returnValue += UnityEngine.Random.Range(0, 10).ToString();
+		}
+		return returnValue;
+#endif
 	}
 	
 	/// <summary>
@@ -202,17 +231,17 @@ public  class GA_GenericInfo
 	/// <param name="parameters">
 	/// The parameters which will be sent to the server <see cref="Dictionary<System.String, System.Object>"/>
 	/// </param>
-	private  Dictionary<string, object> AddSystemSpecs(string key, string type, string message)
+	private  Hashtable AddSystemSpecs(string key, string type, string message)
 	{
 		string addmessage = "";
 		if (message != "")
 			addmessage =  ": " + message;
 		
-		Dictionary<string, object> parameters = new Dictionary<string, object>()
+		Hashtable parameters = new Hashtable()
 		{
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.EventID], "system:" + key },
 			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Message], type + addmessage },
-			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], GA.Settings.CustomArea.Equals(string.Empty)?Application.loadedLevelName:GA.Settings.CustomArea }
+			{ GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Level], GA.SettingsGA.CustomArea.Equals(string.Empty)?Application.loadedLevelName:GA.SettingsGA.CustomArea }
 		};
 		
 		return parameters;
@@ -253,8 +282,14 @@ public  class GA_GenericInfo
 		#elif UNITY_FLASH
 		return "FLASH";
 		
-		#elif UNITY_LINUX
+		#elif UNITY_STANDALONE_LINUX
 		return "LINUX";
+		
+		#elif UNITY_NACL
+		return "NACL"
+			
+		#elif UNITY_DASHBOARD_WIDGET
+		return "DASHBOARD_WIDGET"
 		
 		#else
 		return "UNKNOWN";
