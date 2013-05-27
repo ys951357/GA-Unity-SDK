@@ -12,6 +12,7 @@ public class GA_ExampleBall : MonoBehaviour
 	
 	void Update()
 	{
+		rigidbody.AddForce(Vector3.down * 0.0001f);
 		rigidbody.velocity = rigidbody.velocity.normalized * Speed;
 	}
 }

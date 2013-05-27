@@ -1,4 +1,4 @@
-To use Game Analytics with the Unity3D WebPlayer you might have to place the crossdomain.xml file (found in the _GameAnalytics > _WebPlayer folder) at the root of your web domain.
+To use Game Analytics with the Unity3D WebPlayer you might have to place the crossdomain.xml file (found in the GameAnalytics > WebPlayer folder) at the root of your web domain.
 
 Unity3D Documentation:
 

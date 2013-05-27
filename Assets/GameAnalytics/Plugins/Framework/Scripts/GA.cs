@@ -68,10 +68,10 @@ public class GA {
 
 	private static void InitAPI ()
 	{
-		GA.SettingsGA = (GA_Settings)Resources.Load("GameAnalytics/GA_Settings",typeof(GA_Settings));
+		_settings = (GA_Settings)Resources.Load("GameAnalytics/GA_Settings",typeof(GA_Settings));
 		
 		#if UNITY_EDITOR
- 		if(GA.SettingsGA == null)
+ 		if (_settings == null)
 		{
 			//If the settings asset doesn't exist, then create it. We require a resources folder
 			if(!Directory.Exists(Application.dataPath+"/Resources"))
@@ -104,7 +104,7 @@ public class GA {
 			Selection.activeObject = asset;
 			
 			//save reference
-			GA.SettingsGA =	asset;
+			_settings =	asset;
 		}
 		#endif
 		GA.InitializeQueue(); //will also start a coroutine sending messages to the server if needed

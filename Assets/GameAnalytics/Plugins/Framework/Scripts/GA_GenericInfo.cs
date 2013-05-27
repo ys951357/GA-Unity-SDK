@@ -19,10 +19,7 @@ public  class GA_GenericInfo
 {
 	/*#if UNITY_IPHONE && !UNITY_EDITOR
 	[DllImport ("__Internal")]
-	private static extern bool IsTrackingEnabled ();
-	
-	[DllImport ("__Internal")]
-	private static extern string GetTrackingID ();
+	private static extern string GetUserID ();
 	#endif*/
 	
 	#region public values
@@ -33,7 +30,7 @@ public  class GA_GenericInfo
 	public  string UserID
 	{
 		get {
-			if (_userID == null && !GA.SettingsGA.CustomUserID)
+			if ((_userID == null || _userID == string.Empty) && !GA.SettingsGA.CustomUserID)
 			{
 				if (PlayerPrefs.HasKey("GA_uid"))
 				{
@@ -99,6 +96,8 @@ public  class GA_GenericInfo
 	{
 		List<Hashtable> systemspecs = new List<Hashtable>();
 		
+		systemspecs.Add(AddSystemSpecs("unity_wrapper", GA_Settings.VERSION, message));
+		
 		/*
 		 * Apple does not allow tracking of device specific data:
 		 * "You may not use analytics software in your application to collect and send device data to a third party"
@@ -107,7 +106,6 @@ public  class GA_GenericInfo
 		
 		#if !UNITY_IPHONE
 		
-		systemspecs.Add(AddSystemSpecs("unity_wrapper", GA_Settings.VERSION, message));
 		systemspecs.Add(AddSystemSpecs("os", SystemInfo.operatingSystem, message));
 		systemspecs.Add(AddSystemSpecs("processor_type", SystemInfo.processorType, message));
 		systemspecs.Add(AddSystemSpecs("gfx_name", SystemInfo.graphicsDeviceName, message));
@@ -149,12 +147,14 @@ public  class GA_GenericInfo
 	{
 		/*#if UNITY_IPHONE && !UNITY_EDITOR
 		
-		Debug.Log("iOS tracking enabled: " + IsTrackingEnabled ());
-		Debug.Log("iOS tracking ID: " + GetTrackingID ());
+		string uid = GetUserID();
 		
-		return GetTrackingID ();
+		Debug.Log("iOS tracking ID: " + uid);
 		
-		#el*/
+		return uid;
+		
+		#endif*/
+		
 		#if UNITY_WEBPLAYER || UNITY_NACL
 		
 		return SystemInfo.deviceUniqueIdentifier;
@@ -165,8 +165,8 @@ public  class GA_GenericInfo
 		{
 			NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
 			string mac = "";
-	
-	        foreach (NetworkInterface adapter in nics)
+			
+			foreach (NetworkInterface adapter in nics)
 	        {
 	        	PhysicalAddress address = adapter.GetPhysicalAddress();
 				if (address.ToString() != "" && mac == "")
@@ -208,6 +208,11 @@ public  class GA_GenericInfo
 		}
 		return returnValue;
 #endif
+	}
+	
+	public void SetSessionUUID()
+	{
+		_sessionID = GetSessionUUID();
 	}
 	
 	/// <summary>

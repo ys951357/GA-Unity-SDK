@@ -10,7 +10,7 @@ public class GA_GameObjectManager : MonoBehaviour {
 	
 	public void RunCoroutine(IEnumerator routine)
 	{
-		  StartCoroutine(routine);
+		StartCoroutine(routine);
 	}
 	
 	public void OnApplicationQuit ()
@@ -25,4 +25,14 @@ public class GA_GameObjectManager : MonoBehaviour {
 		}
 #endif
 	}
+	
+#if UNITY_IPHONE || UNITY_ANDROID
+	void OnApplicationPause(bool paused)
+	{
+		if (!paused && GA.SettingsGA.NewSessionOnResume)
+		{
+			GA.API.GenericInfo.SetSessionUUID();
+		}
+	}
+#endif
 }

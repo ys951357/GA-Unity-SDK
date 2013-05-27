@@ -165,6 +165,8 @@ public static class GA_Queue
 	/// </summary>
 	public static void ForceSubmit()
 	{
+		GA_SpecialEvents.SubmitAverageFPS();
+		
 		//If we have something to submit and we have not stopped submitting completely then we start submitting data
 		if (_queue.Count > 0 && !_submittingData && !_endsubmit)
 		{

@@ -49,10 +49,7 @@ public class GA_SystemTracker : MonoBehaviour {
 	}
 	#endif
 	
-	/// <summary>
-	/// Setup involving other components
-	/// </summary>
-	public void Start ()
+	public void Awake ()
 	{
 		if (!Application.isPlaying)
 			return;
@@ -65,6 +62,15 @@ public class GA_SystemTracker : MonoBehaviour {
 			return;
 		}
 		GA_SYSTEMTRACKER = this;
+	}
+	
+	/// <summary>
+	/// Setup involving other components
+	/// </summary>
+	public void Start ()
+	{
+		if (!Application.isPlaying || GA_SYSTEMTRACKER != this)
+			return;
 		
 		if (UseForSubsequentLevels)
 			DontDestroyOnLoad(gameObject);

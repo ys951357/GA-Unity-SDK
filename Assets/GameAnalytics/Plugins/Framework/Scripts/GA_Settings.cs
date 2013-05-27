@@ -31,7 +31,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.4.0";
+	public static string VERSION = "0.4.2";
 	
 	#endregion
 	
@@ -67,6 +67,7 @@ public class GA_Settings : ScriptableObject
 	
 	public bool AllowRoaming = false;
 	public bool ArchiveData = false;
+	public bool NewSessionOnResume = true;
 	public Vector3 HeatmapGridSize = Vector3.one;
 
 	//bytes

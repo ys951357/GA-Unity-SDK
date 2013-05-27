@@ -27,6 +27,7 @@ public class GA_Inspector : Editor
 	private GUIContent _allowRoaming			= new GUIContent("Submit While Roaming", "If enabled and using a mobile device (iOS or Android), data will be submitted to the GameAnalytics servers while the mobile device is roaming (internet connection via carrier data network).");
 	private GUIContent _archiveData				= new GUIContent("Archive Data", "If enabled data will be archived when an internet connection is not available. When an internet connection is established again, any archived data will be sent.");
 	private GUIContent _archiveMaxSize			= new GUIContent("Size<", "Indicates the maximum disk space used for archiving data in bytes.");
+	private GUIContent _newSessionOnResume		= new GUIContent("New Session On Resume", "If enabled and using a mobile device (iOS or Android), a new play session ID will be generated whenever the game is resumed from background.");
 	private GUIContent _basic					= new GUIContent("Basic", "This tab shows general options which are relevant for a wide variety of messages sent to GameAnalytics.");
 	private GUIContent _debug					= new GUIContent("Debug", "This tab shows options which determine how the GameAnalytics wrapper behaves in the Unity3D editor.");
 	private GUIContent _preferences				= new GUIContent("Advanced", "This tab shows advanced and misc. options for the GameAnalytics wrapper.");
@@ -283,6 +284,12 @@ public class GA_Inspector : Editor
 		    GUILayout.Label("", GUILayout.Width(7));
 		    GUILayout.Label(_allowRoaming, GUILayout.Width(150));
 		    ga.AllowRoaming = EditorGUILayout.Toggle("", ga.AllowRoaming);
+			GUILayout.EndHorizontal();
+			
+			GUILayout.BeginHorizontal();
+		    GUILayout.Label("", GUILayout.Width(7));
+		    GUILayout.Label(_newSessionOnResume, GUILayout.Width(150));
+		    ga.NewSessionOnResume = EditorGUILayout.Toggle("", ga.NewSessionOnResume);
 			GUILayout.EndHorizontal();
 			
 			EditorGUILayout.Space();

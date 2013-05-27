@@ -24,12 +24,10 @@ public class GA_SpecialEvents : MonoBehaviour
 	
 	private float _lastLevelStartTime = 0f;
 	
-	private int _frameCountAvg = 0;
-	private float _lastUpdateAvg = 0f;
+	private static int _frameCountAvg = 0;
+	private static float _lastUpdateAvg = 0f;
 	private int _frameCountCrit = 0;
 	private float _lastUpdateCrit = 0f;
-	
-	private GA_SystemTracker _systemTracker;
 	
 	#endregion
 	
@@ -37,29 +35,30 @@ public class GA_SpecialEvents : MonoBehaviour
 	
 	public void Start ()
 	{
-		_systemTracker = GetComponent<GA_SystemTracker>();
-		
 		SceneChange();
+		
 		StartCoroutine(SubmitFPSRoutine());
 	}
+	
 	private IEnumerator SubmitFPSRoutine()
 	{
-		while(Application.isPlaying)
+		while(Application.isPlaying && GA_SystemTracker.GA_SYSTEMTRACKER != null && GA_SystemTracker.GA_SYSTEMTRACKER.SubmitFpsCritical)
 		{
 			SubmitCriticalFPS();
-			yield return new WaitForSeconds(_systemTracker.FpsCirticalSubmitInterval);
+			yield return new WaitForSeconds(GA_SystemTracker.GA_SYSTEMTRACKER.FpsCirticalSubmitInterval);
 		}
 	}
+	
 	public void Update()
 	{
 		//average FPS
-		if (_systemTracker.SubmitFpsAverage)
+		if (GA_SystemTracker.GA_SYSTEMTRACKER.SubmitFpsAverage)
 		{
 			_frameCountAvg++;
 		}
 		
 		//critical FPS
-		if (_systemTracker.SubmitFpsCritical)
+		if (GA_SystemTracker.GA_SYSTEMTRACKER.SubmitFpsCritical)
 		{
 			_frameCountCrit++;
 		}
@@ -80,49 +79,51 @@ public class GA_SpecialEvents : MonoBehaviour
 #endif
 	}
 	
-	public void SubmitAverageFPS()
+	public static void SubmitAverageFPS()
 	{
-		if (_systemTracker == null)
-			_systemTracker = GetComponent<GA_SystemTracker>();
-		
 		//average FPS
-		if (_systemTracker.SubmitFpsAverage)
+		if (GA_SystemTracker.GA_SYSTEMTRACKER != null && GA_SystemTracker.GA_SYSTEMTRACKER.SubmitFpsAverage)
 		{
 			float timeSinceUpdate = Time.time - _lastUpdateAvg;
-			float fpsSinceUpdate = _frameCountAvg / timeSinceUpdate;
-			_lastUpdateAvg = Time.time;
-			_frameCountAvg = 0;
 			
-			if (fpsSinceUpdate > 0)
+			if (timeSinceUpdate > 1.0f)
 			{
-				if (GA.SettingsGA.TrackTarget != null)
-					GA.API.Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString(), GA.SettingsGA.TrackTarget.position);
-				else
-					GA.API.Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString());
+				float fpsSinceUpdate = _frameCountAvg / timeSinceUpdate;
+				_lastUpdateAvg = Time.time;
+				_frameCountAvg = 0;
+				
+				if (fpsSinceUpdate > 0)
+				{
+					if (GA.SettingsGA.TrackTarget != null)
+						GA.API.Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString(), GA.SettingsGA.TrackTarget.position);
+					else
+						GA.API.Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString());
+				}
 			}
 		}
 	}
 	
 	public void SubmitCriticalFPS()
 	{
-		if (_systemTracker == null)
-			_systemTracker = GetComponent<GA_SystemTracker>();
-		
 		//critical FPS
-		if (_systemTracker.SubmitFpsCritical)
+		if (GA_SystemTracker.GA_SYSTEMTRACKER != null && GA_SystemTracker.GA_SYSTEMTRACKER.SubmitFpsCritical)
 		{
 			float timeSinceUpdate = Time.time - _lastUpdateCrit;
-			float fpsSinceUpdate = _frameCountCrit / timeSinceUpdate;
-			_lastUpdateCrit = Time.time;
-			_frameCountCrit = 0;
 			
-			if (fpsSinceUpdate <= _systemTracker.FpsCriticalThreshold)
+			if (timeSinceUpdate > 1.0f)
 			{
-				if (GA.SettingsGA.TrackTarget != null)
-					GA.API.Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString(), GA.SettingsGA.TrackTarget.position);
-				else
-					GA.API.Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString());
+				float fpsSinceUpdate = _frameCountCrit / timeSinceUpdate;
+				_lastUpdateCrit = Time.time;
+				_frameCountCrit = 0;
 				
+				if (fpsSinceUpdate <= GA_SystemTracker.GA_SYSTEMTRACKER.FpsCriticalThreshold)
+				{
+					if (GA.SettingsGA.TrackTarget != null)
+						GA.API.Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString(), GA.SettingsGA.TrackTarget.position);
+					else
+						GA.API.Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString());
+					
+				}
 			}
 		}
 	}
@@ -133,9 +134,7 @@ public class GA_SpecialEvents : MonoBehaviour
 	
 	private void SceneChange()
 	{
-		SubmitAverageFPS();
-		
-		if (_systemTracker.IncludeSceneChange)
+		if (GA_SystemTracker.GA_SYSTEMTRACKER.IncludeSceneChange)
 		{
 			if (GA.SettingsGA.TrackTarget != null)
 				GA.API.Design.NewEvent("GA:LevelStarted", Time.time - _lastLevelStartTime, GA.SettingsGA.TrackTarget.position);
