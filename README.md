@@ -2,6 +2,19 @@
 
 ### Recent Changes:
 
+##### v.0.4.2:
+
+- Average FPS (frames per second) events are now sent on every data submit interval (set under the Advanced tap of GA_Settings), instead of when the scene changes.
+- Added an option for starting a new session on mobile games (iOS and Android), when the game is paused (minimized) and resumed.
+- Minor improvements to the way exceptions are submitted.
+- Minor changes to the file and folder structure of the GA Unity SDK package.
+- Clarified some pop-up help text.
+- A few additional bug fixes and minor tweaks.
+
+##### v.0.4.1:
+
+- Fixed a bug with user ID generation in v.0.4.0
+
 ##### v.0.4.0:
 
 - Added Flash Player support. As a result many code optimisations have been made, which should also improve performance even more on other platforms.
