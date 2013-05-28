@@ -9,6 +9,7 @@
 - Minor improvements to the way exceptions are submitted.
 - Minor changes to the file and folder structure of the GA Unity SDK package.
 - Clarified some pop-up help text.
+- Added support for iOS advertiser ID (see GameAnalytics > Plugins > iOS > iOS_Readme.txt).
 - A few additional bug fixes and minor tweaks.
 
 ##### v.0.4.1:
