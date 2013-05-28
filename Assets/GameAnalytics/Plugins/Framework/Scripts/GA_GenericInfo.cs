@@ -149,9 +149,10 @@ public  class GA_GenericInfo
 		
 		string uid = GetUserID();
 		
-		Debug.Log("iOS tracking ID: " + uid);
-		
-		return uid;
+		if (uid != null && uid != "")
+			return uid;
+		else
+			return "";
 		
 		#endif*/
 		
