@@ -152,7 +152,7 @@ public  class GA_GenericInfo
 		if (uid != null && uid != "")
 			return uid;
 		else
-			return "";
+			return GetSessionUUID();
 		
 		#endif*/
 		
