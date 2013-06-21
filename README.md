@@ -1,5 +1,7 @@
 [Download and Setup](http://support.gameanalytics.com/entries/22584741-Download-and-setup)
 
+NOTE: To use this GIT repository in your Unity game please add the contents directly to your Assets folder.
+
 ### Recent Changes:
 
 ##### v.0.4.2:
