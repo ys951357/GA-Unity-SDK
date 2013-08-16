@@ -101,7 +101,7 @@ public  class GA_Archive
 					
 					if (saveData)
 					{
-						ArrayList itemsParameters = (ArrayList)MiniJSON.JsonDecode(json);//JsonMapper.ToObject<List<Dictionary<string, object>>>(json);
+						ArrayList itemsParameters = (ArrayList)GA_MiniJSON.JsonDecode(json);//JsonMapper.ToObject<List<Dictionary<string, object>>>(json);
 						
 						foreach (Hashtable parameters in itemsParameters)
 						{

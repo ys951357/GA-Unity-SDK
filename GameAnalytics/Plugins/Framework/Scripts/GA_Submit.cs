@@ -257,11 +257,12 @@ public class GA_Submit
 			}
 			
 			//Prepare the JSON array string for sending by converting it to a byte array
-			byte[] data = Encoding.ASCII.GetBytes(json);
+			byte[] data = Encoding.UTF8.GetBytes(json);
 			
 			//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
 			Hashtable headers = new Hashtable();
 			headers.Add("Authorization", CreateMD5Hash(json + _privateKey));
+			headers.Add("Content-Length", data.Length);
 			
 			//Try to send the data
 			WWW www = new WWW(url, data, headers);
@@ -289,7 +290,7 @@ public class GA_Submit
 				}
 				
 				//Get the JSON object from the response
-				Hashtable returnParam = (Hashtable)MiniJSON.JsonDecode(www.text);
+				Hashtable returnParam = (Hashtable)GA_MiniJSON.JsonDecode(www.text);
 				
 				//If the response contains the key "status" with the value "ok" we know that the message was sent and recieved successfully
 				if ((returnParam != null &&
@@ -405,7 +406,7 @@ public class GA_Submit
 		
 		// Gets the MD5 hash for input
 		MD5 md5 = new MD5CryptoServiceProvider();
-		byte[] data = Encoding.Default.GetBytes(input);
+		byte[] data = Encoding.UTF8.GetBytes(input);
 		byte[] hash = md5.ComputeHash(data);
 		// Transforms as hexa
 		string hexaHash = "";
@@ -468,7 +469,7 @@ public class GA_Submit
 	{
 		// Gets the sha1 hash for input
 		SHA1 sha1 = new SHA1CryptoServiceProvider();
-		byte[] data = Encoding.Default.GetBytes(input);
+		byte[] data = Encoding.UTF8.GetBytes(input);
 		byte[] hash = sha1.ComputeHash(data);
 		// Returns sha1 hash as string
 		return Convert.ToBase64String(hash);

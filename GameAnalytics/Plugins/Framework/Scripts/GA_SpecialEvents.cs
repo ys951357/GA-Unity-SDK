@@ -95,9 +95,9 @@ public class GA_SpecialEvents : MonoBehaviour
 				if (fpsSinceUpdate > 0)
 				{
 					if (GA.SettingsGA.TrackTarget != null)
-						GA.API.Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString(), GA.SettingsGA.TrackTarget.position);
+						GA.API.Design.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate), GA.SettingsGA.TrackTarget.position);
 					else
-						GA.API.Quality.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate).ToString());
+						GA.API.Design.NewEvent("GA:AverageFPS", ((int)fpsSinceUpdate));
 				}
 			}
 		}
@@ -119,9 +119,9 @@ public class GA_SpecialEvents : MonoBehaviour
 				if (fpsSinceUpdate <= GA_SystemTracker.GA_SYSTEMTRACKER.FpsCriticalThreshold)
 				{
 					if (GA.SettingsGA.TrackTarget != null)
-						GA.API.Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString(), GA.SettingsGA.TrackTarget.position);
+						GA.API.Design.NewEvent("GA:CriticalFPS", _frameCountCrit, GA.SettingsGA.TrackTarget.position);
 					else
-						GA.API.Quality.NewEvent("GA:CriticalFPS", _frameCountCrit.ToString());
+						GA.API.Design.NewEvent("GA:CriticalFPS", _frameCountCrit);
 					
 				}
 			}

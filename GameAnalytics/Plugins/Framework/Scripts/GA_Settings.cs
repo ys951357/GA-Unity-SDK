@@ -31,7 +31,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.4.2";
+	public static string VERSION = "0.4.4";
 	
 	#endregion
 	
@@ -175,7 +175,7 @@ public class GA_Settings : ScriptableObject
 				else
 				{
 					//Get the JSON object from the response
-					Hashtable returnParam = (Hashtable)MiniJSON.JsonDecode(www.text);
+					Hashtable returnParam = (Hashtable)GA_MiniJSON.JsonDecode(www.text);
 					
 					//If the response contains the key "status" with the value "ok" we know that we are connected
 					if (returnParam != null && returnParam.ContainsKey("status") && returnParam["status"].ToString().Equals("ok"))

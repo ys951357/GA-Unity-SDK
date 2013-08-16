@@ -72,25 +72,64 @@ public class GA_Menu : MonoBehaviour
 	static void TogglePlayMaker ()
 	{
 		bool enabled = false;
+		bool fail = false;
 		
 		string searchText = "#if false";
 		string replaceText = "#if true";
 		
 		string filePath = Application.dataPath + "/GameAnalytics/Plugins/Playmaker/SendBusinessEvent.cs";
-		enabled = ReplaceInFile (filePath, searchText, replaceText);
+		string filePathJS = Application.dataPath + "/Plugins/GameAnalytics/Playmaker/SendBusinessEvent.cs";
+		try {
+			enabled = ReplaceInFile (filePath, searchText, replaceText);
+		} catch {
+			try {
+				enabled = ReplaceInFile (filePathJS, searchText, replaceText);
+			} catch {
+				fail = true;
+			}
+		}
 		
 		filePath = Application.dataPath + "/GameAnalytics/Plugins/Playmaker/SendDesignEvent.cs";
-		ReplaceInFile (filePath, searchText, replaceText);
+		filePathJS = Application.dataPath + "/Plugins/GameAnalytics/Playmaker/SendDesignEvent.cs";
+		try {
+			enabled = ReplaceInFile (filePath, searchText, replaceText);
+		} catch {
+			try {
+				enabled = ReplaceInFile (filePathJS, searchText, replaceText);
+			} catch {
+				fail = true;
+			}
+		}
 		
 		filePath = Application.dataPath + "/GameAnalytics/Plugins/Playmaker/SendQualityEvent.cs";
-		ReplaceInFile (filePath, searchText, replaceText);
+		filePathJS = Application.dataPath + "/Plugins/GameAnalytics/Playmaker/SendQualityEvent.cs";
+		try {
+			enabled = ReplaceInFile (filePath, searchText, replaceText);
+		} catch {
+			try {
+				enabled = ReplaceInFile (filePathJS, searchText, replaceText);
+			} catch {
+				fail = true;
+			}
+		}
 		
 		filePath = Application.dataPath + "/GameAnalytics/Plugins/Playmaker/SendUserEvent.cs";
-		ReplaceInFile (filePath, searchText, replaceText);
+		filePathJS = Application.dataPath + "/Plugins/GameAnalytics/Playmaker/SendUserEvent.cs";
+		try {
+			enabled = ReplaceInFile (filePath, searchText, replaceText);
+		} catch {
+			try {
+				enabled = ReplaceInFile (filePathJS, searchText, replaceText);
+			} catch {
+				fail = true;
+			}
+		}
 		
 		AssetDatabase.Refresh();
 		
-		if (enabled)
+		if (fail)
+			Debug.Log("Failed to toggle PlayMaker Scripts.");
+		else if (enabled)
 			Debug.Log("Enabled PlayMaker Scripts.");
 		else
 			Debug.Log("Disabled PlayMaker Scripts.");
@@ -120,5 +159,64 @@ public class GA_Menu : MonoBehaviour
 		writer.Close ();
 		
 		return enabled;
+	}
+	
+	[MenuItem ("Window/GameAnalytics/Folder Structure/Switch to JS", false, 600)]
+	static void JsFolders ()
+	{
+		if (!Directory.Exists(Application.dataPath + "/GameAnalytics/Plugins/"))
+		{
+			Debug.LogWarning("Folder structure incompatible, did you already switch to JS folder structure, or have you manually changed the folder structure?");
+			return;
+		}
+		
+		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/Components", Application.dataPath + "/GameAnalytics/Components");
+		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/Examples", Application.dataPath + "/GameAnalytics/Examples");
+		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/Framework", Application.dataPath + "/GameAnalytics/Framework");
+		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/iOS", Application.dataPath + "/GameAnalytics/iOS");
+		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/Playmaker", Application.dataPath + "/GameAnalytics/Playmaker");
+		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/Resources", Application.dataPath + "/GameAnalytics/Resources");
+		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/WebPlayer", Application.dataPath + "/GameAnalytics/WebPlayer");
+		
+		if (!Directory.Exists(Application.dataPath + "/Plugins/"))
+			Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/", Application.dataPath + "/Plugins");
+		else
+			Directory.Delete(Application.dataPath + "/GameAnalytics/Plugins/");
+		
+		if (!Directory.Exists(Application.dataPath + "/Editor/"))
+			Directory.CreateDirectory(Application.dataPath + "/Editor/");
+		
+		Directory.Move(Application.dataPath + "/GameAnalytics/Editor", Application.dataPath + "/Editor/GameAnalytics");
+		
+		Directory.Move(Application.dataPath + "/GameAnalytics/", Application.dataPath + "/Plugins/GameAnalytics");
+		
+		AssetDatabase.Refresh();
+	}
+	
+	[MenuItem ("Window/GameAnalytics/Folder Structure/Revert to original", false, 601)]
+	static void RevertFolders ()
+	{
+		if (!Directory.Exists(Application.dataPath + "/Plugins/GameAnalytics/"))
+		{
+			Debug.LogWarning("Folder structure incompatible, are you already using original folder structure, or have you manually changed the folder structure?");
+			return;
+		}
+		
+		if (!Directory.Exists(Application.dataPath + "/Plugins/GameAnalytics/Plugins/"))
+			Directory.CreateDirectory(Application.dataPath + "/Plugins/GameAnalytics/Plugins/");
+		
+		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/Components", Application.dataPath + "/Plugins/GameAnalytics/Plugins/Components");
+		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/Examples", Application.dataPath + "/Plugins/GameAnalytics/Plugins/Examples");
+		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/Framework", Application.dataPath + "/Plugins/GameAnalytics/Plugins/Framework");
+		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/iOS", Application.dataPath + "/Plugins/GameAnalytics/Plugins/iOS");
+		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/Playmaker", Application.dataPath + "/Plugins/GameAnalytics/Plugins/Playmaker");
+		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/Resources", Application.dataPath + "/Plugins/GameAnalytics/Plugins/Resources");
+		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/WebPlayer", Application.dataPath + "/Plugins/GameAnalytics/Plugins/WebPlayer");
+		
+		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics", Application.dataPath + "/GameAnalytics");
+		
+		Directory.Move(Application.dataPath + "/Editor/GameAnalytics", Application.dataPath + "/GameAnalytics/Editor");
+		
+		AssetDatabase.Refresh();
 	}
 }

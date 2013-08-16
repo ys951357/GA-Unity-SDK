@@ -4,6 +4,19 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.4.4:
+
+- New menu options to upload / delete mesh AssetBundles for use with the new browser heatmap tool.
+- New menu option to update folder structure for compatibility with UnityScript (JavaScript) and Boo (menu: GameAnalytics > Folder Structure > Switch to JS).
+- New menu option to revert to original folder structure (menu: GameAnalytics > Folder Structure > Revert to original).
+- Added build option to heatmaps.
+- Added "Select for all builds" option to heatmaps.
+- Fixed some minor issues with the heatmap histogram display for heatmaps with negative values.
+- Fixed a minor encoding issue with message authorization.
+- Changed Average FPS and Critical FPS events to Design events (instead of Quality events). This will allow you to view the average values in our online tool.
+- Changed the class name of our MiniJson implementation to GA_MiniJson, to avoid conflicts with other plugins.
+- Due to a bug with the Solid render model currently not supporting negative values, it has been removed as an option from heatmaps for now.
+
 ##### v.0.4.2:
 
 - Average FPS (frames per second) events are now sent on every data submit interval (set under the Advanced tap of GA_Settings), instead of when the scene changes.
