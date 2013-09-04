@@ -39,6 +39,10 @@ public class GA_Inspector : Editor
 		if(ga.Logo == null)
 		{
 			ga.Logo = (Texture2D)Resources.LoadAssetAtPath("Assets/GameAnalytics/Plugins/Examples/gaLogo.png", typeof(Texture2D));
+			
+			if (ga.Logo == null)
+				ga.Logo = (Texture2D)Resources.LoadAssetAtPath("Assets/Plugins/GameAnalytics/Examples/gaLogo.png", typeof(Texture2D));
+			
 			//http://www.base64-image.de
 			/*String d = "";
 			d += "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAA";

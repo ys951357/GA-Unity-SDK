@@ -31,9 +31,11 @@ public class GA_Menu : MonoBehaviour
 	static void AddGASystemTracker ()
 	{
 		if (FindObjectOfType (typeof(GA_SystemTracker)) == null) {
-			GameObject systemTracker = Instantiate (Resources.Load ("Prefabs/GA_SystemTracker", typeof(GameObject))) as GameObject;
-			systemTracker.name = "GA_SystemTracker";
-			Selection.activeObject = systemTracker;
+			GameObject go = new GameObject("GA_SystemTracker");
+			go.AddComponent<GA_Gui>();
+			go.AddComponent<GA_SpecialEvents>();
+			go.AddComponent<GA_SystemTracker>();
+			Selection.activeObject = go;
 		} else {
 			GA.LogWarning ("A GA_SystemTracker already exists in this scene - you should never have more than one per scene!");
 		}
@@ -42,9 +44,10 @@ public class GA_Menu : MonoBehaviour
 	[MenuItem ("Window/GameAnalytics/Create GA_Heatmap", false, 201)]
 	static void AddHeatMap ()
 	{
-		GameObject heatmap = Instantiate (Resources.Load ("Prefabs/GA_HeatMap", typeof(GameObject))) as GameObject;
-		heatmap.name = "GA_HeatMap";
-		Selection.activeObject = heatmap;
+		GameObject go = new GameObject("GA_HeatMap");
+		go.AddComponent<GA_HeatMapRenderer>();
+		go.AddComponent<GA_HeatMapDataFilter>();
+		Selection.activeObject = go;
 	}
 	
 	[MenuItem ("Window/GameAnalytics/Add GA_Tracker to Object", false, 202)]
@@ -170,25 +173,26 @@ public class GA_Menu : MonoBehaviour
 			return;
 		}
 		
-		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/Components", Application.dataPath + "/GameAnalytics/Components");
-		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/Examples", Application.dataPath + "/GameAnalytics/Examples");
-		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/Framework", Application.dataPath + "/GameAnalytics/Framework");
-		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/iOS", Application.dataPath + "/GameAnalytics/iOS");
-		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/Playmaker", Application.dataPath + "/GameAnalytics/Playmaker");
-		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/Resources", Application.dataPath + "/GameAnalytics/Resources");
-		Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/WebPlayer", Application.dataPath + "/GameAnalytics/WebPlayer");
-		
 		if (!Directory.Exists(Application.dataPath + "/Plugins/"))
-			Directory.Move(Application.dataPath + "/GameAnalytics/Plugins/", Application.dataPath + "/Plugins");
-		else
-			Directory.Delete(Application.dataPath + "/GameAnalytics/Plugins/");
+			AssetDatabase.CreateFolder("Assets", "Plugins");
+		if (!Directory.Exists(Application.dataPath + "/Plugins/GameAnalytics"))
+			AssetDatabase.CreateFolder("Assets/Plugins", "GameAnalytics");
+		
+		AssetDatabase.MoveAsset("Assets/GameAnalytics/Plugins/Components", "Assets/Plugins/GameAnalytics/Components");
+		AssetDatabase.MoveAsset("Assets/GameAnalytics/Plugins/Examples", "Assets/Plugins/GameAnalytics/Examples");
+		AssetDatabase.MoveAsset("Assets/GameAnalytics/Plugins/Framework", "Assets/Plugins/GameAnalytics/Framework");
+		AssetDatabase.MoveAsset("Assets/GameAnalytics/Plugins/iOS", "Assets/Plugins/GameAnalytics/iOS");
+		AssetDatabase.MoveAsset("Assets/GameAnalytics/Plugins/Playmaker", "Assets/Plugins/GameAnalytics/Playmaker");
+		AssetDatabase.MoveAsset("Assets/GameAnalytics/Plugins/WebPlayer", "Assets/Plugins/GameAnalytics/WebPlayer");
 		
 		if (!Directory.Exists(Application.dataPath + "/Editor/"))
-			Directory.CreateDirectory(Application.dataPath + "/Editor/");
+			AssetDatabase.CreateFolder("Assets", "Editor");
 		
-		Directory.Move(Application.dataPath + "/GameAnalytics/Editor", Application.dataPath + "/Editor/GameAnalytics");
+		AssetDatabase.MoveAsset("Assets/GameAnalytics/Editor", "Assets/Editor/GameAnalytics");
 		
-		Directory.Move(Application.dataPath + "/GameAnalytics/", Application.dataPath + "/Plugins/GameAnalytics");
+		AssetDatabase.DeleteAsset("Assets/GameAnalytics/Plugins");
+		AssetDatabase.DeleteAsset("Assets/GameAnalytics/Editor");
+		AssetDatabase.DeleteAsset("Assets/GameAnalytics");
 		
 		AssetDatabase.Refresh();
 	}
@@ -202,21 +206,24 @@ public class GA_Menu : MonoBehaviour
 			return;
 		}
 		
-		if (!Directory.Exists(Application.dataPath + "/Plugins/GameAnalytics/Plugins/"))
-			Directory.CreateDirectory(Application.dataPath + "/Plugins/GameAnalytics/Plugins/");
+		if (!Directory.Exists(Application.dataPath + "/GameAnalytics/"))
+			AssetDatabase.CreateFolder("Assets", "GameAnalytics");
+		if (!Directory.Exists(Application.dataPath + "/GameAnalytics/Plugins"))
+			AssetDatabase.CreateFolder("Assets/GameAnalytics", "Plugins");
 		
-		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/Components", Application.dataPath + "/Plugins/GameAnalytics/Plugins/Components");
-		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/Examples", Application.dataPath + "/Plugins/GameAnalytics/Plugins/Examples");
-		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/Framework", Application.dataPath + "/Plugins/GameAnalytics/Plugins/Framework");
-		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/iOS", Application.dataPath + "/Plugins/GameAnalytics/Plugins/iOS");
-		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/Playmaker", Application.dataPath + "/Plugins/GameAnalytics/Plugins/Playmaker");
-		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/Resources", Application.dataPath + "/Plugins/GameAnalytics/Plugins/Resources");
-		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics/WebPlayer", Application.dataPath + "/Plugins/GameAnalytics/Plugins/WebPlayer");
+		AssetDatabase.MoveAsset("Assets/Plugins/GameAnalytics/Components", "Assets/GameAnalytics/Plugins/Components");
+		AssetDatabase.MoveAsset("Assets/Plugins/GameAnalytics/Examples", "Assets/GameAnalytics/Plugins/Examples");
+		AssetDatabase.MoveAsset("Assets/Plugins/GameAnalytics/Framework", "Assets/GameAnalytics/Plugins/Framework");
+		AssetDatabase.MoveAsset("Assets/Plugins/GameAnalytics/iOS", "Assets/GameAnalytics/Plugins/iOS");
+		AssetDatabase.MoveAsset("Assets/Plugins/GameAnalytics/Playmaker", "Assets/GameAnalytics/Plugins/Playmaker");
+		AssetDatabase.MoveAsset("Assets/Plugins/GameAnalytics/WebPlayer", "Assets/GameAnalytics/Plugins/WebPlayer");
 		
-		Directory.Move(Application.dataPath + "/Plugins/GameAnalytics", Application.dataPath + "/GameAnalytics");
+		AssetDatabase.MoveAsset("Assets/Editor/GameAnalytics", "Assets/GameAnalytics/Editor");
 		
-		Directory.Move(Application.dataPath + "/Editor/GameAnalytics", Application.dataPath + "/GameAnalytics/Editor");
+		AssetDatabase.DeleteAsset("Assets/Plugins/GameAnalytics");
+		AssetDatabase.DeleteAsset("Assets/Editor/GameAnalytics");
 		
-		AssetDatabase.Refresh();
+		Debug.Log("Project must be reloaded when reverting folder structure.");
+		EditorApplication.OpenProject(Application.dataPath.Remove(Application.dataPath.Length - "Assets".Length, "Assets".Length));
 	}
 }

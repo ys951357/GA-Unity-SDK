@@ -56,7 +56,7 @@ public class GA_Debug
 			
 			if (SubmitErrorStackTrace)
 			{
-				SubmitError(eventID, logString + " " + stackTrace);
+				SubmitError(eventID, logString.Replace('"', '\'').Replace('\n', ' ').Replace('\r', ' ') + " " + stackTrace.Replace('"', '\'').Replace('\n', ' ').Replace('\r', ' '));
 				errorSubmitted = true;
 			}
 			

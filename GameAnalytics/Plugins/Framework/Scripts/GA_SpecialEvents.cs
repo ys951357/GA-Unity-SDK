@@ -6,8 +6,6 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(GA_SystemTracker))]
-
 public class GA_SpecialEvents : MonoBehaviour
 {
 	/*[HideInInspector]

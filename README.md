@@ -4,6 +4,12 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.4.5:
+
+- Fixed a bug with creating new GA prefabs after changing folder structure.
+- Fixed a reference exception with the GA logo texture.
+- Fixed a JSON formatting error that would occur with exceptions containing a " symbol.
+
 ##### v.0.4.4:
 
 - New menu options to upload / delete mesh AssetBundles for use with the new browser heatmap tool.

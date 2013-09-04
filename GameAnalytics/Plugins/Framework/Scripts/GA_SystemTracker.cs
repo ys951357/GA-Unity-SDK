@@ -16,10 +16,10 @@ public class GA_SystemTracker : MonoBehaviour {
 	
 	public static GA_SystemTracker GA_SYSTEMTRACKER;
 	
-	public bool UseForSubsequentLevels;
+	public bool UseForSubsequentLevels = true;
 	
 	public bool IncludeSystemSpecs;
-	public bool IncludeSceneChange;
+	public bool IncludeSceneChange = true;
 	public bool SubmitErrors;
 	public int MaxErrorCount = 10;
 	public bool SubmitErrorStackTrace;
