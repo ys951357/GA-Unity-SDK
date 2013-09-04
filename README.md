@@ -8,7 +8,7 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 - Fixed a bug with creating new GA prefabs after changing folder structure.
 - Fixed a reference exception with the GA logo texture.
-- Fixed a JSON formatting error that would occur with exceptions containing a " symbol.
+- Fixed a JSON formatting error that would occur with exceptions containing ", \n, or \r symbols.
 
 ##### v.0.4.4:
 
