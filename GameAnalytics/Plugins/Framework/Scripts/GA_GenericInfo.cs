@@ -17,11 +17,6 @@ using System.Text;
 
 public  class GA_GenericInfo
 {
-	/*#if UNITY_IPHONE && !UNITY_EDITOR
-	[DllImport ("__Internal")]
-	private static extern string GetUserID ();
-	#endif*/
-	
 	#region public values
 	
 	/// <summary>
@@ -145,16 +140,16 @@ public  class GA_GenericInfo
 	/// </returns>
 	public  string GetUserUUID()
 	{
-		/*#if UNITY_IPHONE && !UNITY_EDITOR
+		#if UNITY_IPHONE && !UNITY_EDITOR
 		
-		string uid = GetUserID();
+		string uid = GA.SettingsGA.GetUniqueIDiOS();
 		
-		if (uid != null && uid != "")
+		if (uid != null && uid != string.Empty)
 			return uid;
 		else
-			return GetSessionUUID();
+			return SystemInfo.deviceUniqueIdentifier;
 		
-		#endif*/
+		#endif
 		
 		#if UNITY_WEBPLAYER || UNITY_NACL
 		
@@ -259,7 +254,7 @@ public  class GA_GenericInfo
 	/// <returns>
 	/// String determining the system the user is currently running <see cref="System.String"/>
 	/// </returns>
-	private  string GetSystem()
+	public  string GetSystem()
 	{
 		#if UNITY_STANDALONE_OSX
 		return "MAC";

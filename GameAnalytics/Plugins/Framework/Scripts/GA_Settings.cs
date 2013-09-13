@@ -9,6 +9,11 @@ using System.Collections.Generic;
 /// 
 public class GA_Settings : ScriptableObject
 {
+	/*#if UNITY_IPHONE && !UNITY_EDITOR
+	[DllImport ("__Internal")]
+	private static extern string GetUserID ();
+	#endif*/
+	
 	/// <summary>
 	/// Types of help given in the help box of the GA inspector
 	/// </summary>
@@ -31,7 +36,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.4.5";
+	public static string VERSION = "0.4.6";
 	
 	#endregion
 	
@@ -63,6 +68,7 @@ public class GA_Settings : ScriptableObject
 	[SerializeField]
 	public string Build = "0.1";
 	public bool DebugMode = true;
+	public bool SendExampleGameDataToMyGame = false;
 	public bool RunInEditorPlayMode = true;
 	
 	public bool AllowRoaming = false;
@@ -201,12 +207,74 @@ public class GA_Settings : ScriptableObject
 			else
 				GA.Log("GA detects no internet connection..");
 			
+			//Add additional IDs
+			AddUniqueIDs();
+			
 			//Start the submit queue for sending messages to the server
 			GA.RunCoroutine(GA_Queue.SubmitQueue());
 			GA.Log("GameAnalytics: Submission queue started.");
 		}
 	}
 	
+	private void AddUniqueIDs()
+	{
+		#if !UNITY_EDITOR
+		
+		string os = "";
+		string[] osSplit = SystemInfo.operatingSystem.Split(' ');
+		if (osSplit.Length > 0)
+			os = osSplit[0];
+		
+		#endif
+		
+		#if UNITY_IPHONE && !UNITY_EDITOR
+		
+		try
+		{
+			string iOSid = GetUniqueIDiOS();
+			if (uid != null && uid != string.Empty)
+			{
+				GA.API.User.NewUser(GA_User.Gender.Unknown, null, null, iOSid, null, GA.API.GenericInfo.GetSystem(), SystemInfo.deviceModel, os, SystemInfo.operatingSystem, "GA Unity SDK " + VERSION);
+			}
+		}
+		catch
+		{ }
+		
+		#elif UNITY_ANDROID && !UNITY_EDITOR
+		
+		/*
+		try
+		{
+			AndroidJNI.AttachCurrentThread();
+			
+			using (AndroidJavaClass cls_UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
+				
+				using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity")) {
+					
+					AndroidJavaClass cls_AndroidID = new AndroidJavaClass("com.yourcompany.yourgame.GA_Android");
+					
+					string androidID = cls_AndroidID.CallStatic<string>("GetDeviceId");
+					GA.API.User.NewUser(GA_User.Gender.Unknown, null, null, null, androidID, GA.API.GenericInfo.GetSystem(), SystemInfo.deviceModel, os, SystemInfo.operatingSystem, "GA Unity SDK " + VERSION);
+				}
+			}
+		}
+		catch
+		{ }
+		*/
+		
+		#elif !UNITY_EDITOR
+		
+		GA.API.User.NewUser(GA_User.Gender.Unknown, null, null, null, null, GA.API.GenericInfo.GetSystem(), SystemInfo.deviceModel, os, SystemInfo.operatingSystem, "GA Unity SDK " + VERSION);
+		
+		#endif
+	}
+	
+	public string GetUniqueIDiOS ()
+	{
+		string uid = "";
+		//uid = GetUserID();
+		return uid;
+	}
 		
 	/// <summary>
 	/// Sets a custom user ID.

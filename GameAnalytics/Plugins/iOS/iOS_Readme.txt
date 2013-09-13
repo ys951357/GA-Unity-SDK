@@ -1,24 +1,15 @@
 How to enabled advertiser ID for iOS:
 
-1) Uncomment this section at the top of the GA_GenericInfo class (GameAnalytics > Plugins > Framework > Scripts):
+1) Uncomment this section at the top of the GA_Settings class (GameAnalytics > Plugins > Framework > Scripts):
 
 	if UNITY_IPHONE && !UNITY_EDITOR
 	[DllImport ("__Internal")]
 	private static extern string GetUserID ();
 	#endif
 
-2) Uncomment this section at the top of the GetUserUUID method of the GA_GenericInfo class (GameAnalytics > Plugins > Framework > Scripts):
+2) Uncomment this line in the GetUniqueIDiOS method of the GA_Settings class (GameAnalytics > Plugins > Framework > Scripts):
 
-	#if UNITY_IPHONE && !UNITY_EDITOR
-	
-	string uid = GetUserID();
-	
-	if (uid != null && uid != "")
-		return uid;
-	else
-		return "";
-	
-	#endif
+	uid = GetUserID();
 
 3) Move the GA_UserID.mm file from the GameAnalytics > Plugins > iOS folder to a new folder called Plugins > iOS in your Assets folder. This will cause Unity to include the file in your compiled XCode project when you build for iOS.
 

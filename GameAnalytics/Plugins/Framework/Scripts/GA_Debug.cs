@@ -16,7 +16,7 @@ public class GA_Debug
 	
 	private int _errorCount = 0;
 	
-	private bool _showLogOnGUI = true;
+	private bool _showLogOnGUI = false;
 	public List<string> Messages;
 	
 	/// <summary>

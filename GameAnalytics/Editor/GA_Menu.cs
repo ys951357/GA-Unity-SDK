@@ -178,6 +178,7 @@ public class GA_Menu : MonoBehaviour
 		if (!Directory.Exists(Application.dataPath + "/Plugins/GameAnalytics"))
 			AssetDatabase.CreateFolder("Assets/Plugins", "GameAnalytics");
 		
+		AssetDatabase.MoveAsset("Assets/GameAnalytics/Plugins/Android", "Assets/Plugins/GameAnalytics/Android");
 		AssetDatabase.MoveAsset("Assets/GameAnalytics/Plugins/Components", "Assets/Plugins/GameAnalytics/Components");
 		AssetDatabase.MoveAsset("Assets/GameAnalytics/Plugins/Examples", "Assets/Plugins/GameAnalytics/Examples");
 		AssetDatabase.MoveAsset("Assets/GameAnalytics/Plugins/Framework", "Assets/Plugins/GameAnalytics/Framework");
@@ -211,6 +212,7 @@ public class GA_Menu : MonoBehaviour
 		if (!Directory.Exists(Application.dataPath + "/GameAnalytics/Plugins"))
 			AssetDatabase.CreateFolder("Assets/GameAnalytics", "Plugins");
 		
+		AssetDatabase.MoveAsset("Assets/Plugins/GameAnalytics/Android", "Assets/GameAnalytics/Plugins/Android");
 		AssetDatabase.MoveAsset("Assets/Plugins/GameAnalytics/Components", "Assets/GameAnalytics/Plugins/Components");
 		AssetDatabase.MoveAsset("Assets/Plugins/GameAnalytics/Examples", "Assets/GameAnalytics/Plugins/Examples");
 		AssetDatabase.MoveAsset("Assets/Plugins/GameAnalytics/Framework", "Assets/GameAnalytics/Plugins/Framework");

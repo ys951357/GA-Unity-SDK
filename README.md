@@ -4,6 +4,13 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.4.6:
+
+- Added an option under GA_Settings > Debug for sending data from the Example Tutorial Game to your own game.
+- Made it possible for users to resize the GA Setup Wizard and GA Example Tutorial windows.
+- Added additional options for identifying user on Android devices (see readme in GameAnalytics > Plugins > Android folder).
+- Additional user and device information is automatically tracked at the beginning of each session.
+
 ##### v.0.4.5:
 
 - Fixed a bug with creating new GA prefabs after changing folder structure.
