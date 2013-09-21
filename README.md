@@ -4,6 +4,10 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.4.7:
+
+- Fixed an iOS bug with a value name in GA_Settings
+
 ##### v.0.4.6:
 
 - Added an option under GA_Settings > Debug for sending data from the Example Tutorial Game to your own game.

@@ -36,7 +36,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.4.6";
+	public static string VERSION = "0.4.7";
 	
 	#endregion
 	
@@ -232,7 +232,7 @@ public class GA_Settings : ScriptableObject
 		try
 		{
 			string iOSid = GetUniqueIDiOS();
-			if (uid != null && uid != string.Empty)
+			if (iOSid != null && iOSid != string.Empty)
 			{
 				GA.API.User.NewUser(GA_User.Gender.Unknown, null, null, iOSid, null, GA.API.GenericInfo.GetSystem(), SystemInfo.deviceModel, os, SystemInfo.operatingSystem, "GA Unity SDK " + VERSION);
 			}
