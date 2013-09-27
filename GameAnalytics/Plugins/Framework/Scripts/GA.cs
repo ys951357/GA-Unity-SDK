@@ -127,6 +127,12 @@ public class GA {
 		if(!Application.isPlaying)
 			return; // no need to setup anything else, if we are in the editor and not playing
 		
+		if (GA.API.GenericInfo.UserID == "" && !GA.SettingsGA.CustomUserID)
+		{
+			Debug.LogWarning("GA UserID not set. No data will be sent.");
+			return;
+		}
+		
 		GA.RunCoroutine(GA.SettingsGA.CheckInternetConnectivity(true));
 	}
 	

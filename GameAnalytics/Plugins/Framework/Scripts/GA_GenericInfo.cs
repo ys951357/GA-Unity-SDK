@@ -27,16 +27,7 @@ public  class GA_GenericInfo
 		get {
 			if ((_userID == null || _userID == string.Empty) && !GA.SettingsGA.CustomUserID)
 			{
-				if (PlayerPrefs.HasKey("GA_uid"))
-				{
-					_userID = PlayerPrefs.GetString("GA_uid");
-				}
-				else
-				{
-					_userID = GetUserUUID();
-					PlayerPrefs.SetString("GA_uid", _userID);
-					PlayerPrefs.Save();
-				}
+				_userID = GetUserUUID();
 			}
 			return _userID;
 		}
@@ -144,10 +135,16 @@ public  class GA_GenericInfo
 		
 		string uid = GA.SettingsGA.GetUniqueIDiOS();
 		
-		if (uid != null && uid != string.Empty)
+		if (uid != null)
 			return uid;
 		else
-			return SystemInfo.deviceUniqueIdentifier;
+			return "";
+		
+		#endif
+		
+		#if UNITY_IPHONE && UNITY_EDITOR
+		
+		GA.LogWarning("GA Warning: Remember to read the iOS_Readme in the GameAnalytics > Plugins > iOS folder, for information on how to setup advertiser ID for iOS. GA will not work on iOS if you do not follow these steps.");
 		
 		#endif
 		

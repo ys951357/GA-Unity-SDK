@@ -36,7 +36,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.4.7";
+	public static string VERSION = "0.4.8";
 	
 	#endregion
 	
