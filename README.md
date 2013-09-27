@@ -4,6 +4,10 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.4.8:
+
+- Fixed an issue with user IDs on iOS 7. Note: no data will be tracked on iOS if not set up correctly (please read the iOS_Reame in the GameAnalytics > Plugins > iOS folder for details).
+
 ##### v.0.4.7:
 
 - Fixed an iOS bug with a value name in GA_Settings
