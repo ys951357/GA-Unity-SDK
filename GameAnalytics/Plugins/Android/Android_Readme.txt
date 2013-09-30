@@ -16,25 +16,9 @@ Hint: You can compile a .jar file using f.x. Eclipse or the Terminal/commandprom
 
 In a) the -classpath corresponds to your classes.jar Unity file, and the -bootclasspath corresponds to the android.jar file in your android sdk. In b) you have to input you company name and game name in com.yourcompany.yourgamename.GA_Android (as in your bundle id).
 
-4) In the GA_Settings class file (found at GameAnalytics > Plugins > Framework > Scripts > GA_Settings) uncomment the following code in the AddUniqueIDs() method:
+4) In the GA_Settings class file (found at GameAnalytics > Plugins > Framework > Scripts > GA_Settings) uncomment the following code at the top:
 
-		try
-		{
-			AndroidJNI.AttachCurrentThread();
-			
-			using (AndroidJavaClass cls_UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
-				
-				using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity")) {
-					
-					AndroidJavaClass cls_AndroidID = new AndroidJavaClass("com.yourcompany.yourgame.GA_Android");
-					
-					string androidID = cls_AndroidID.CallStatic<string>("GetDeviceId");
-					GA.API.User.NewUser(GA_User.Gender.Unknown, null, null, null, androidID);
-				}
-			}
-		}
-		catch
-		{ }
+		//#define ANDROID_ID
 
-.. and add your own bundle id to this line (in the same code) - using your company name and game name:
+.. and add your own bundle id to this line of code (in the AddUniqueIDs method) - using your company name and game name:
 AndroidJavaClass cls_AndroidID = new AndroidJavaClass("com.yourcompany.yourgame.GA_Android");

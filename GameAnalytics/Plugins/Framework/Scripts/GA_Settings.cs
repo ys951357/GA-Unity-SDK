@@ -1,7 +1,10 @@
+//#define IOS_ID
+//#define ANDROID_ID
+
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Runtime.InteropServices;
 
 /// <summary>
 /// GA test. This should be instances as an asset and 
@@ -9,10 +12,10 @@ using System.Collections.Generic;
 /// 
 public class GA_Settings : ScriptableObject
 {
-	/*#if UNITY_IPHONE && !UNITY_EDITOR
+	#if UNITY_IPHONE && !UNITY_EDITOR && IOS_ID
 	[DllImport ("__Internal")]
 	private static extern string GetUserID ();
-	#endif*/
+	#endif
 	
 	/// <summary>
 	/// Types of help given in the help box of the GA inspector
@@ -36,7 +39,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.4.8";
+	public static string VERSION = "0.4.9";
 	
 	#endregion
 	
@@ -227,7 +230,7 @@ public class GA_Settings : ScriptableObject
 		
 		#endif
 		
-		#if UNITY_IPHONE && !UNITY_EDITOR
+		#if UNITY_IPHONE && !UNITY_EDITOR && IOS_ID
 		
 		try
 		{
@@ -240,9 +243,8 @@ public class GA_Settings : ScriptableObject
 		catch
 		{ }
 		
-		#elif UNITY_ANDROID && !UNITY_EDITOR
+		#elif UNITY_ANDROID && !UNITY_EDITOR && ANDROID_ID
 		
-		/*
 		try
 		{
 			AndroidJNI.AttachCurrentThread();
@@ -260,7 +262,6 @@ public class GA_Settings : ScriptableObject
 		}
 		catch
 		{ }
-		*/
 		
 		#elif !UNITY_EDITOR
 		
@@ -272,7 +273,9 @@ public class GA_Settings : ScriptableObject
 	public string GetUniqueIDiOS ()
 	{
 		string uid = "";
-		//uid = GetUserID();
+		#if UNITY_IPHONE && !UNITY_EDITOR && IOS_ID
+		uid = GetUserID();
+		#endif
 		return uid;
 	}
 		
