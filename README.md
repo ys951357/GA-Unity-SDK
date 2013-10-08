@@ -4,6 +4,14 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.5.0:
+
+- Windows Phone 8 and Windows Store Apps support.
+- Webplayer builds now automatically determine whether to use http or https, when sending data, based on webplayer url.
+- Fixed an url encoding issue with heatmap mesh uploads.
+- Fixed an issue with iOS identifiers on devices running an older OS version than iOS 6.
+- Minor improvements to the implementation process for iOS and Android identifiers.
+
 ##### v.0.4.9:
 
 - Ironed out some minor issues with the v.0.4.8 quick fix.

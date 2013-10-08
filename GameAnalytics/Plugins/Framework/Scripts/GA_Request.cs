@@ -12,6 +12,10 @@ using System.Text;
 using System;
 //using LitJson;
 
+#if UNITY_METRO && !UNITY_EDITOR
+using GA_Compatibility.Collections;
+#endif
+
 public class GA_Request
 {
 	/// <summary>
@@ -55,13 +59,28 @@ public class GA_Request
 		
 		url += "/?" + requestInfo;
 		
+		WWW www = null;
+		
+		#if !UNITY_WP8 && !UNITY_METRO
+		
 		//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
 		Hashtable headers = new Hashtable();
 		headers.Add("Authorization", GA.API.Submit.CreateMD5Hash(requestInfo + GA.SettingsGA.ApiKey));
 		
 		//Try to send the data
-		WWW www = new WWW(url, new byte[] { 0 }, headers);
-
+		www = new WWW(url, new byte[] { 0 }, headers);
+		
+		#else
+		
+		//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
+		Dictionary<string, string> headers = new Dictionary<string, string>();
+		headers.Add("Authorization", GA.API.Submit.CreateMD5Hash(requestInfo + GA.SettingsGA.ApiKey));
+		
+		//Try to send the data
+		www = new WWW(url, new byte[] { 0 }, headers);
+		
+		#endif
+		
 		GA.RunCoroutine(Request(www, RequestType.GA_GetHeatmapGameInfo, successEvent, errorEvent),()=>www.isDone);
 		
 		return www;
@@ -105,13 +124,28 @@ public class GA_Request
 		
 		url += "/?" + requestInfo;
 		
+		WWW www = null;
+		
+		#if !UNITY_WP8 && !UNITY_METRO
+		
 		//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
 		Hashtable headers = new Hashtable();
 		headers.Add("Authorization", GA.API.Submit.CreateMD5Hash(requestInfo + GA.SettingsGA.ApiKey));
 		
 		//Try to send the data
-		WWW www = new WWW(url, new byte[] { 0 }, headers);
+		www = new WWW(url, new byte[] { 0 }, headers);
+		
+		#else
+		
+		//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
+		Dictionary<string, string> headers = new Dictionary<string, string>();
+		headers.Add("Authorization", GA.API.Submit.CreateMD5Hash(requestInfo + GA.SettingsGA.ApiKey));
+		
+		//Try to send the data
+		www = new WWW(url, new byte[] { 0 }, headers);
 
+		#endif
+		
 		GA.RunCoroutine(Request(www, RequestType.GA_GetHeatmapData, successEvent, errorEvent),()=>www.isDone);
 				
 		return www;

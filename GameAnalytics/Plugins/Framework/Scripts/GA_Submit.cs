@@ -11,8 +11,12 @@ using System;
 //using LitJson;
 using System.Linq;
 
-#if !UNITY_FLASH
+#if !UNITY_FLASH && !UNITY_WP8 && !UNITY_METRO
 using System.Security.Cryptography;
+#endif
+
+#if UNITY_METRO && !UNITY_EDITOR
+using GA_Compatibility.Collections;
 #endif
 
 public class GA_Submit
@@ -48,7 +52,7 @@ public class GA_Submit
 	
 	private string _publicKey;
 	private string _privateKey;
-	private string _baseURL = "http://api.gameanalytics.com";
+	private string _baseURL = "://api.gameanalytics.com";
 	private string _version = "1";
 	
 	#endregion
@@ -90,11 +94,13 @@ public class GA_Submit
 	/// <param name="errorEvent">
 	/// If an error occurs this will be fired <see cref="SubmitErrorHandler"/>
 	/// </param>
-	public void SubmitQueue(List<Item> queue, SubmitSuccessHandler successEvent, SubmitErrorHandler errorEvent)
+	public void SubmitQueue(List<Item> queue, SubmitSuccessHandler successEvent, SubmitErrorHandler errorEvent, bool gaTracking, string pubKey, string priKey)
 	{
-		if (_publicKey.Equals("") || _privateKey.Equals(""))
+		if ((_publicKey.Equals("") || _privateKey.Equals("")) && (pubKey.Equals("") || priKey.Equals("")))
 		{
-			GA.LogError("Game Key and/or Secret Key not set. Open GA_Settings to set keys.");
+			if (!gaTracking)
+				GA.LogError("Game Key and/or Secret Key not set. Open GA_Settings to set keys.");
+			
 			return;
 		}
 		
@@ -155,7 +161,7 @@ public class GA_Submit
 			}
 		}
 		
-		GA.RunCoroutine(Submit(categories, successEvent, errorEvent));
+		GA.RunCoroutine(Submit(categories, successEvent, errorEvent, gaTracking, pubKey, priKey));
 	}
 	
 	/// <summary>
@@ -173,8 +179,14 @@ public class GA_Submit
 	/// <returns>
 	/// A <see cref="IEnumerator"/>
 	/// </returns>
-	public IEnumerator Submit(Dictionary<CategoryType, List<Item>> categories, SubmitSuccessHandler successEvent, SubmitErrorHandler errorEvent)
+	public IEnumerator Submit(Dictionary<CategoryType, List<Item>> categories, SubmitSuccessHandler successEvent, SubmitErrorHandler errorEvent, bool gaTracking, string pubKey, string priKey)
 	{
+		if (pubKey.Equals(""))
+			pubKey = _publicKey;
+		
+		if (priKey.Equals(""))
+			priKey = _privateKey;
+		
 		//For each existing category, submit a message containing all the items of that category type
 		foreach (KeyValuePair<CategoryType, List<Item>> kvp in categories)
 		{
@@ -187,7 +199,7 @@ public class GA_Submit
 			
 			//Since all the items must have the same category (we make sure they do below) we can get the category from the first item
 			CategoryType serviceType = items[0].Type;
-			string url = GetURL(Categories[serviceType]);
+			string url = GetURL(Categories[serviceType], pubKey);
 			
 			//Make sure that all items are of the same category type, and put all the parameter collections into a list
 			List<Hashtable> itemsParameters = new List<Hashtable>();
@@ -232,7 +244,7 @@ public class GA_Submit
 			
 			/* If we do not have access to a network connection (or we are roaming (mobile devices) and GA_static_api.Settings.ALLOWROAMING is false),
 			 * and data is set to be archived, then archive the data and pretend the message was sent successfully */
-			if  (GA.SettingsGA.ArchiveData && !GA.SettingsGA.InternetConnectivity)
+			if  (GA.SettingsGA.ArchiveData && !gaTracking && !GA.SettingsGA.InternetConnectivity)
 			{
 				if (GA.SettingsGA.DebugMode)
 				{
@@ -248,7 +260,9 @@ public class GA_Submit
 			}
 			else if (!GA.SettingsGA.InternetConnectivity)
 			{
-				GA.LogWarning("GA Error: No network connection.");
+				if (!gaTracking)
+					GA.LogWarning("GA Error: No network connection.");
+				
 				if (errorEvent != null)
 				{
 					errorEvent(items);
@@ -259,15 +273,32 @@ public class GA_Submit
 			//Prepare the JSON array string for sending by converting it to a byte array
 			byte[] data = Encoding.UTF8.GetBytes(json);
 			
+			WWW www = null;
+			
+			#if !UNITY_WP8 && !UNITY_METRO
+			
 			//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
 			Hashtable headers = new Hashtable();
-			headers.Add("Authorization", CreateMD5Hash(json + _privateKey));
+			headers.Add("Authorization", CreateMD5Hash(json + priKey));
 			headers.Add("Content-Length", data.Length);
 			
 			//Try to send the data
-			WWW www = new WWW(url, data, headers);
+			www = new WWW(url, data, headers);
 			
-			#if !UNITY_FLASH
+			#else
+			
+			//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
+			
+			Dictionary<string, string> headers = new Dictionary<string, string>();
+			headers.Add("Authorization", CreateMD5Hash(json + priKey));
+			headers.Add("Content-Length", data.Length.ToString());
+			
+			//Try to send the data
+			www = new WWW(url, data, headers);
+			
+			#endif
+			
+			#if !UNITY_FLASH && !UNITY_WP8 && !UNITY_METRO
 			//Set thread priority low
 			www.threadPriority = ThreadPriority.Low;
 			#endif
@@ -275,11 +306,11 @@ public class GA_Submit
 			//Wait for response
 			yield return www;
 			
-			if (GA.SettingsGA.DebugMode)
+			if (GA.SettingsGA.DebugMode && !gaTracking)
 			{
 				GA.Log("GA URL: " + url);
 				GA.Log("GA Submit: " + json);
-				GA.Log("GA Hash: " + CreateMD5Hash(json + _privateKey));
+				GA.Log("GA Hash: " + CreateMD5Hash(json + priKey));
 			}
 			
 			try
@@ -297,7 +328,7 @@ public class GA_Submit
 				    returnParam.ContainsKey("status") && returnParam["status"].ToString().Equals("ok")) ||
 					CheckServerReply(www))
 				{
-					if (GA.SettingsGA.DebugMode)
+					if (GA.SettingsGA.DebugMode && !gaTracking)
 					{
 						GA.Log("GA Result: " + www.text);
 					}
@@ -316,7 +347,8 @@ public class GA_Submit
 					    returnParam.ContainsKey("message") && returnParam["message"].ToString().Equals("Game not found") &&
 						returnParam.ContainsKey("code") && returnParam["code"].ToString().Equals("400"))
 					{
-						GA.LogWarning("GA Error: " + www.text + " (NOTE: make sure your Game Key and Secret Key match the keys you recieved from the Game Analytics website. It might take a few minutes before a newly added game will be able to recieve data.)");
+						if (!gaTracking)
+							GA.LogWarning("GA Error: " + www.text + " (NOTE: make sure your Game Key and Secret Key match the keys you recieved from the Game Analytics website. It might take a few minutes before a newly added game will be able to recieve data.)");
 						
 						//An error event with a null parameter will stop the GA wrapper from submitting messages
 						if (errorEvent != null)
@@ -326,7 +358,8 @@ public class GA_Submit
 					}
 					else
 					{
-						GA.LogWarning("GA Error: " + www.text);
+						if (!gaTracking)
+							GA.LogWarning("GA Error: " + www.text);
 						
 						if (errorEvent != null)
 						{
@@ -337,7 +370,8 @@ public class GA_Submit
 			}
 			catch (Exception e)
 			{
-				GA.LogWarning("GA Error: " + e.Message);
+				if (!gaTracking)
+					GA.LogWarning("GA Error: " + e.Message);
 				
 				/* If we hit one of these errors we should not attempt to send the message again
 				 * (if necessary we already threw a GA Error which may be tracked) */
@@ -372,9 +406,9 @@ public class GA_Submit
 	public string GetBaseURL(bool inclVersion)
 	{
 		if (inclVersion)
-			return _baseURL + "/" + _version;
+			return GetUrlStart() + _baseURL + "/" + _version;
 		
-		return _baseURL;
+		return GetUrlStart() + _baseURL;
 	}
 	
 	/// <summary>
@@ -386,9 +420,17 @@ public class GA_Submit
 	/// <returns>
 	/// A string representing the url matching our service choice on the GA server <see cref="System.String"/>
 	/// </returns>
-	public string GetURL(string category)
+	public string GetURL(string category, string pubKey)
 	{
-		return _baseURL + "/" + _version + "/" + _publicKey + "/" + category;
+		return GetUrlStart() + _baseURL + "/" + _version + "/" + pubKey + "/" + category;
+	}
+	
+	private string GetUrlStart()
+	{
+		if (Application.absoluteURL.StartsWith("https"))
+			return "https";
+		else
+			return "http";
 	}
 	
 	/// <summary>
@@ -402,12 +444,24 @@ public class GA_Submit
 	/// </returns>
 	public string CreateMD5Hash(string input)
 	{
-		#if !UNITY_FLASH
+		#if !UNITY_FLASH && !UNITY_WP8 && !UNITY_METRO
 		
 		// Gets the MD5 hash for input
 		MD5 md5 = new MD5CryptoServiceProvider();
 		byte[] data = Encoding.UTF8.GetBytes(input);
 		byte[] hash = md5.ComputeHash(data);
+		// Transforms as hexa
+		string hexaHash = "";
+		foreach (byte b in hash) {
+			hexaHash += String.Format("{0:x2}", b);
+		}
+		// Returns MD5 hexa hash as string
+		return hexaHash;
+		
+		#elif UNITY_WP8 || UNITY_METRO
+		
+		byte[] data = Encoding.UTF8.GetBytes(input);
+		byte[] hash = MD5Core.GetHash(data);
 		// Transforms as hexa
 		string hexaHash = "";
 		foreach (byte b in hash) {
@@ -464,7 +518,7 @@ public class GA_Submit
 	/// <returns>
 	/// The sha1 hash encoded result of input <see cref="System.String"/>
 	/// </returns>
-	#if !UNITY_FLASH
+	#if !UNITY_FLASH && !UNITY_WP8 && !UNITY_METRO
 	public string CreateSha1Hash(string input)
 	{
 		// Gets the sha1 hash for input
@@ -542,25 +596,26 @@ public class GA_Submit
 	/// </param>
 	public static string DictToJson(List<Hashtable> list)
 	{
-		StringBuilder b = new StringBuilder("[");
+		string b = "[";
 		int d = 0;
 		int c = 0;
 		foreach(var dict in list)
 		{
-			b.Append('{');
+			b += '{';
 			c = 0;
 			foreach(var key in dict.Keys)
 			{
 				c++;
-				b.AppendFormat("\"{0}\":\"{1}\"", key, dict[key]);
+				b += "\""+key+"\":\""+dict[key]+"\"";
 				if(c<dict.Keys.Count)
-					b.Append(',');
+					b += ',';
 			}
-			b.Append('}');
+			b += '}';
 			d++;
 			if(d<list.Count)
-				b.Append(',');
+				b += ',';
 		}
-		return b.Append("]").ToString();
+		b += "]";
+		return b;
 	}
 }

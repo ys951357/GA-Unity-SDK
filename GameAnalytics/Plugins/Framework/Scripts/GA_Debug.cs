@@ -7,6 +7,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
+#if UNITY_METRO && !UNITY_EDITOR
+using GA_Compatibility.Collections;
+#endif
+
 public class GA_Debug
 {
 	public bool SubmitErrors;

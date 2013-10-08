@@ -1,3 +1,5 @@
+In order to follow Apple's terms the GameAnalytics Unity SDK will only submit data on iOS if the following steps are completed.
+
 How to enabled advertiser ID for iOS:
 
 1) Uncomment this section at the top of the GA_Settings class (GameAnalytics > Plugins > Framework > Scripts):

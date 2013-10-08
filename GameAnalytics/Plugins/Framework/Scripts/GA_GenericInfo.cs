@@ -9,10 +9,14 @@ using System.Runtime.InteropServices;
 using System;
 using System.Net;
 
-#if !UNITY_WEBPLAYER && !UNITY_NACL && !UNITY_FLASH
+#if !UNITY_WEBPLAYER && !UNITY_NACL && !UNITY_FLASH && !UNITY_WP8 && !UNITY_METRO
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Text;
+#endif
+
+#if UNITY_METRO && !UNITY_EDITOR
+using GA_Compatibility.Collections;
 #endif
 
 public  class GA_GenericInfo
@@ -135,20 +139,14 @@ public  class GA_GenericInfo
 		
 		string uid = GA.SettingsGA.GetUniqueIDiOS();
 		
-		if (uid != null)
-			return uid;
-		else
+		if (uid == null)
 			return "";
+		else if (uid != "OLD")
+			return uid;
 		
 		#endif
 		
-		#if UNITY_IPHONE && UNITY_EDITOR
-		
-		GA.LogWarning("GA Warning: Remember to read the iOS_Readme in the GameAnalytics > Plugins > iOS folder, for information on how to setup advertiser ID for iOS. GA will not work on iOS if you do not follow these steps.");
-		
-		#endif
-		
-		#if UNITY_WEBPLAYER || UNITY_NACL
+		#if UNITY_WEBPLAYER || UNITY_NACL || UNITY_WP8 || UNITY_METRO
 		
 		return SystemInfo.deviceUniqueIdentifier;
 		
@@ -288,6 +286,15 @@ public  class GA_GenericInfo
 			
 		#elif UNITY_DASHBOARD_WIDGET
 		return "DASHBOARD_WIDGET"
+		
+		#elif UNITY_METRO
+		return "WINDOWS_STORE_APP"
+		
+		#elif UNITY_WP8
+		return "WINDOWS_PHONE_8"
+		
+		#elif UNITY_BLACKBERRY
+		return "BLACKBERRY"
 		
 		#else
 		return "UNKNOWN";

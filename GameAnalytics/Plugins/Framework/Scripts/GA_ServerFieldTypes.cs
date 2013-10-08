@@ -38,7 +38,13 @@ public static class GA_ServerFieldTypes
 		Device,
 		Os,
 		OsVersion,
-		Sdk
+		Sdk,
+		InstallPublisher,
+		InstallSite,
+		InstallCampaign,
+		InstallAdgroup,
+		InstallAd,
+		InstallKeyword
 	}
 	
 	/// <summary>
@@ -73,6 +79,12 @@ public static class GA_ServerFieldTypes
 		{ FieldType.Device, "device" },
 		{ FieldType.Os, "os" },
 		{ FieldType.OsVersion, "os_version" },
-		{ FieldType.Sdk, "sdk_version" }
+		{ FieldType.Sdk, "sdk_version" },
+		{ FieldType.InstallPublisher, "install_publisher" },
+		{ FieldType.InstallSite, "install_site" },
+		{ FieldType.InstallCampaign, "install_campaign" },
+		{ FieldType.InstallAdgroup, "install_adgroup" },
+		{ FieldType.InstallAd, "install_ad" },
+		{ FieldType.InstallKeyword, "install_keyword" }
 	};
 }

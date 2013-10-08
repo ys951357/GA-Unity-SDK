@@ -20,5 +20,4 @@ In a) the -classpath corresponds to your classes.jar Unity file, and the -bootcl
 
 		//#define ANDROID_ID
 
-.. and add your own bundle id to this line of code (in the AddUniqueIDs method) - using your company name and game name:
-AndroidJavaClass cls_AndroidID = new AndroidJavaClass("com.yourcompany.yourgame.GA_Android");
+.. and at the top of the GA_SETTINGS class file change the value of ANDROID_CLASS_NAME to your own bundle id instead of "com.yourcompany.yourgame".

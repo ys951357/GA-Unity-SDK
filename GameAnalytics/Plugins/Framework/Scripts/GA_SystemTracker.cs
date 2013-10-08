@@ -6,6 +6,10 @@ using System.Collections.Generic;
 using UnityEditor;
 #endif
 
+#if UNITY_METRO && !UNITY_EDITOR
+using GA_Compatibility.Collections;
+#endif
+
 [RequireComponent(typeof(GA_SpecialEvents))]
 [RequireComponent(typeof(GA_Gui))]
 

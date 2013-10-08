@@ -6,6 +6,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+#if UNITY_METRO && !UNITY_EDITOR
+using GA_Compatibility.Collections;
+#endif
+
 /// <summary>
 /// GA test. This should be instances as an asset and 
 /// </summary>
@@ -15,6 +19,10 @@ public class GA_Settings : ScriptableObject
 	#if UNITY_IPHONE && !UNITY_EDITOR && IOS_ID
 	[DllImport ("__Internal")]
 	private static extern string GetUserID ();
+	#endif
+	
+	#if UNITY_ANDROID && !UNITY_EDITOR && ANDROID_ID
+	private const string ANDROID_CLASS_NAME = "com.yourcompany.yourgame";
 	#endif
 	
 	/// <summary>
@@ -39,7 +47,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.4.9";
+	public static string VERSION = "0.5.0";
 	
 	#endregion
 	
@@ -216,6 +224,13 @@ public class GA_Settings : ScriptableObject
 			//Start the submit queue for sending messages to the server
 			GA.RunCoroutine(GA_Queue.SubmitQueue());
 			GA.Log("GameAnalytics: Submission queue started.");
+			
+			#if UNITY_EDITOR
+			
+			GameObject gaTracking = new GameObject("GA Trackeing");
+			gaTracking.AddComponent<GA_Tracking>();
+			
+			#endif
 		}
 	}
 	
@@ -253,7 +268,7 @@ public class GA_Settings : ScriptableObject
 				
 				using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity")) {
 					
-					AndroidJavaClass cls_AndroidID = new AndroidJavaClass("com.yourcompany.yourgame.GA_Android");
+					AndroidJavaClass cls_AndroidID = new AndroidJavaClass(ANDROID_CLASS_NAME + ".GA_Android");
 					
 					string androidID = cls_AndroidID.CallStatic<string>("GetDeviceId");
 					GA.API.User.NewUser(GA_User.Gender.Unknown, null, null, null, androidID, GA.API.GenericInfo.GetSystem(), SystemInfo.deviceModel, os, SystemInfo.operatingSystem, "GA Unity SDK " + VERSION);
@@ -273,9 +288,15 @@ public class GA_Settings : ScriptableObject
 	public string GetUniqueIDiOS ()
 	{
 		string uid = "";
+		
 		#if UNITY_IPHONE && !UNITY_EDITOR && IOS_ID
 		uid = GetUserID();
 		#endif
+		
+		#if UNITY_IPHONE && UNITY_EDITOR && !IOS_ID
+		GA.LogWarning("GA Warning: Remember to read the iOS_Readme in the GameAnalytics > Plugins > iOS folder, for information on how to setup advertiser ID for iOS. GA will not work on iOS if you do not follow these steps.");
+		#endif
+		
 		return uid;
 	}
 		
