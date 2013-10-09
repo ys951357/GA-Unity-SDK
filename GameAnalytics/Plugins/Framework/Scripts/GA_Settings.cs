@@ -47,7 +47,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.5.0";
+	public static string VERSION = "0.5.1";
 	
 	#endregion
 	
@@ -277,6 +277,10 @@ public class GA_Settings : ScriptableObject
 		}
 		catch
 		{ }
+		
+		#elif UNITY_FLASH && !UNITY_EDITOR
+		
+		GA.API.User.NewUser(GA_User.Gender.Unknown, null, null, null, null, GA.API.GenericInfo.GetSystem(), "Flash", os, SystemInfo.operatingSystem, "GA Unity SDK " + VERSION);
 		
 		#elif !UNITY_EDITOR
 		

@@ -282,19 +282,19 @@ public  class GA_GenericInfo
 		return "LINUX";
 		
 		#elif UNITY_NACL
-		return "NACL"
+		return "NACL";
 			
 		#elif UNITY_DASHBOARD_WIDGET
-		return "DASHBOARD_WIDGET"
+		return "DASHBOARD_WIDGET";
 		
 		#elif UNITY_METRO
-		return "WINDOWS_STORE_APP"
+		return "WINDOWS_STORE_APP";
 		
 		#elif UNITY_WP8
-		return "WINDOWS_PHONE_8"
+		return "WINDOWS_PHONE_8";
 		
 		#elif UNITY_BLACKBERRY
-		return "BLACKBERRY"
+		return "BLACKBERRY";
 		
 		#else
 		return "UNKNOWN";

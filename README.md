@@ -4,6 +4,10 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.5.1:
+
+- Minor fixes and improvements.
+
 ##### v.0.5.0:
 
 - Windows Phone 8 and Windows Store Apps support.
