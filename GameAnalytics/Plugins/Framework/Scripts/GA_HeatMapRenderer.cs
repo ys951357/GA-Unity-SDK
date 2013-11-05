@@ -58,6 +58,11 @@ public class GA_HeatMapRenderer : MonoBehaviour
 		 
 		//Create meshes
 		
+		if(datafilter == null)
+		{
+			datafilter = GetComponent<GA_HeatMapDataFilterBase>();
+		}
+		
 		if(datafilter != null)
 		{
 			var data = datafilter.GetData();

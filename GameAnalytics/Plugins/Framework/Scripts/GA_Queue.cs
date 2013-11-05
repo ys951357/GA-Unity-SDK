@@ -185,6 +185,16 @@ public static class GA_Queue
 		}
 	}
 	
+	/// <summary>
+	/// No more data will be sent after this timer interval
+	/// </summary>
+	public static void EndSubmit()
+	{
+		GA.Log("GA: Ending all data submission after this timer interval");
+		
+		_endsubmit = true;
+	}
+	
 	#endregion
 	
 	#region private methods

@@ -4,6 +4,11 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.5.2:
+
+- Added new function to stops GA from sending data: GA_Queue.EndSubmit(). Can be used to allow users to opt out of tracking.
+- Minor bug fixes.
+
 ##### v.0.5.1:
 
 - Minor fixes and improvements.
