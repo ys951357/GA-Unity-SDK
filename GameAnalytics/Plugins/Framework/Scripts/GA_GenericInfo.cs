@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System;
 using System.Net;
 
-#if !UNITY_WEBPLAYER && !UNITY_NACL && !UNITY_FLASH && !UNITY_WP8 && !UNITY_METRO
+#if !UNITY_WEBPLAYER && !UNITY_NACL && !UNITY_FLASH && !UNITY_WP8 && !UNITY_METRO && !UNITY_PS3
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Text;
@@ -146,7 +146,7 @@ public  class GA_GenericInfo
 		
 		#endif
 		
-		#if UNITY_WEBPLAYER || UNITY_NACL || UNITY_WP8 || UNITY_METRO
+		#if UNITY_WEBPLAYER || UNITY_NACL || UNITY_WP8 || UNITY_METRO || UNITY_PS3
 		
 		return SystemInfo.deviceUniqueIdentifier;
 		

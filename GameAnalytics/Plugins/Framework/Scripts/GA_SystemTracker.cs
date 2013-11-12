@@ -22,20 +22,20 @@ public class GA_SystemTracker : MonoBehaviour {
 	
 	public bool UseForSubsequentLevels = true;
 	
-	public bool IncludeSystemSpecs;
+	public bool IncludeSystemSpecs = true;
 	public bool IncludeSceneChange = true;
-	public bool SubmitErrors;
+	public bool SubmitErrors = true;
 	public int MaxErrorCount = 10;
-	public bool SubmitErrorStackTrace;
-	public bool SubmitErrorSystemInfo;
-	public bool SubmitFpsAverage;
-	public bool SubmitFpsCritical;
+	public bool SubmitErrorStackTrace = true;
+	public bool SubmitErrorSystemInfo = true;
+	public bool SubmitFpsAverage = true;
+	public bool SubmitFpsCritical = true;
 	public int FpsCriticalThreshold = 30;
 	public int FpsCirticalSubmitInterval = 10;
 	public bool GuiEnabled;
 	public bool GuiAllowScreenshot;
 
-	public bool ErrorFoldOut;
+	public bool ErrorFoldOut = true;
 	
 	#endregion
 	

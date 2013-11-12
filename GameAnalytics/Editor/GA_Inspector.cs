@@ -32,6 +32,7 @@ public class GA_Inspector : Editor
 	private GUIContent _basic					= new GUIContent("Basic", "This tab shows general options which are relevant for a wide variety of messages sent to GameAnalytics.");
 	private GUIContent _debug					= new GUIContent("Debug", "This tab shows options which determine how the GameAnalytics wrapper behaves in the Unity3D editor.");
 	private GUIContent _preferences				= new GUIContent("Advanced", "This tab shows advanced and misc. options for the GameAnalytics wrapper.");
+	private GUIContent _autoSubmitUserInfo		= new GUIContent("Auto Submit User Info", "If enabled information about platform, device, os, and os version is automatically submitted at the start of each session.");
 	
 	void OnEnable()
 	{
@@ -125,7 +126,7 @@ public class GA_Inspector : Editor
 		}
 		if (GUILayout.Button(_checkForUpdates, GUILayout.MaxWidth(65)))
 		{
-			Application.OpenURL("http://easy.gameanalytics.com/DownloadSetup"); //http://u3d.as/content/game-analytics/game-analytics-unity-package
+			Application.OpenURL("http://easy.gameanalytics.com/DownloadSetup");
 		}
 		
 		GUILayout.EndHorizontal();
@@ -301,6 +302,12 @@ public class GA_Inspector : Editor
 		    GUILayout.Label("", GUILayout.Width(7));
 		    GUILayout.Label(_newSessionOnResume, GUILayout.Width(150));
 		    ga.NewSessionOnResume = EditorGUILayout.Toggle("", ga.NewSessionOnResume);
+			GUILayout.EndHorizontal();
+			
+			GUILayout.BeginHorizontal();
+		    GUILayout.Label("", GUILayout.Width(7));
+		    GUILayout.Label(_autoSubmitUserInfo, GUILayout.Width(150));
+		    ga.AutoSubmitUserInfo = EditorGUILayout.Toggle("", ga.AutoSubmitUserInfo);
 			GUILayout.EndHorizontal();
 			
 			EditorGUILayout.Space();
