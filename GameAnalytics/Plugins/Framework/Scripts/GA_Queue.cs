@@ -257,6 +257,9 @@ public static class GA_Queue
 				case GA_Submit.CategoryType.GA_Log:
 					GA.SettingsGA.QualityMessagesSubmitted++;
 					break;
+				case GA_Submit.CategoryType.GA_Error:
+					GA.SettingsGA.ErrorMessagesSubmitted++;
+					break;
 				case GA_Submit.CategoryType.GA_Purchase:
 					GA.SettingsGA.BusinessMessagesSubmitted++;
 					break;
@@ -330,6 +333,9 @@ public static class GA_Queue
 					break;
 				case GA_Submit.CategoryType.GA_Log:
 					GA.SettingsGA.QualityMessagesFailed++;
+					break;
+				case GA_Submit.CategoryType.GA_Error:
+					GA.SettingsGA.ErrorMessagesFailed++;
 					break;
 				case GA_Submit.CategoryType.GA_Purchase:
 					GA.SettingsGA.BusinessMessagesFailed++;

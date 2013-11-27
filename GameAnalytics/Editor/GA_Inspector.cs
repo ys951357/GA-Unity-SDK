@@ -246,7 +246,11 @@ public class GA_Inspector : Editor
 		    GUILayout.Label("", GUILayout.Width(7));
 		    GUILayout.Label(_heatmapSizeLabel, GUILayout.Width(150));
 			GUILayout.EndHorizontal();
+			
+			#if UNITY_4_2 || UNITY_4_1 || UNITY_4_0_1 || UNITY_4_0
 			GUILayout.Space(-15);
+			#endif
+			
 			ga.HeatmapGridSize = EditorGUILayout.Vector3Field("", ga.HeatmapGridSize);
 			if (ga.HeatmapGridSize != Vector3.one)
 			{

@@ -4,6 +4,11 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.5.4:
+
+- Fixed a UI display error for the GA_Settings Advanced tab in Unity 4.3
+- Added a new GA_Error.cs (message category); exceptions, errors, log info, etc., should use this class. Automatic error handling with the GA_SystemTracker will also use the new GA_Error class.
+
 ##### v.0.5.3:
 
 - Added an option to toggle automatic tracking of user info (enabled by default). See the Advanced tab under GA_Settings.

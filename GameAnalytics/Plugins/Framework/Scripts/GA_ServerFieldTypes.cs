@@ -44,7 +44,8 @@ public static class GA_ServerFieldTypes
 		InstallCampaign,
 		InstallAdgroup,
 		InstallAd,
-		InstallKeyword
+		InstallKeyword,
+		Severity
 	}
 	
 	/// <summary>
@@ -85,6 +86,7 @@ public static class GA_ServerFieldTypes
 		{ FieldType.InstallCampaign, "install_campaign" },
 		{ FieldType.InstallAdgroup, "install_adgroup" },
 		{ FieldType.InstallAd, "install_ad" },
-		{ FieldType.InstallKeyword, "install_keyword" }
+		{ FieldType.InstallKeyword, "install_keyword" },
+		{ FieldType.Severity, "severity" }
 	};
 }

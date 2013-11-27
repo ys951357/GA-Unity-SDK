@@ -30,7 +30,7 @@ public class GA_Submit
 	/// <summary>
 	/// Types of services on the GA server
 	/// </summary>
-	public enum CategoryType { GA_User, GA_Event, GA_Log, GA_Purchase }
+	public enum CategoryType { GA_User, GA_Event, GA_Log, GA_Purchase, GA_Error }
 	
 	/// <summary>
 	/// An item is a message (parameters) and the category (GA service) the message should be sent to
@@ -78,7 +78,8 @@ public class GA_Submit
 			{ CategoryType.GA_User, "user" },
 			{ CategoryType.GA_Event, "design" },
 			{ CategoryType.GA_Log, "quality" },
-			{ CategoryType.GA_Purchase, "business" }
+			{ CategoryType.GA_Purchase, "business" },
+			{ CategoryType.GA_Error, "error" }
 		};
 	}
 	

@@ -11,7 +11,7 @@ using GA_Compatibility.Collections;
 #endif
 
 /// <summary>
-/// GA test. This should be instances as an asset and 
+/// The GA_Settings object contains an array of options which allows you to customize your use of GameAnalytics. Most importantly you will need to fill in your Game Key and Secret Key on the GA_Settings object to use the service.
 /// </summary>
 /// 
 public class GA_Settings : ScriptableObject
@@ -47,7 +47,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.5.3";
+	public static string VERSION = "0.5.4";
 	
 	#endregion
 	
@@ -60,6 +60,8 @@ public class GA_Settings : ScriptableObject
 	public int DesignMessagesFailed;
 	public int QualityMessagesSubmitted;
 	public int QualityMessagesFailed;
+	public int ErrorMessagesSubmitted;
+	public int ErrorMessagesFailed;
 	public int BusinessMessagesSubmitted;
 	public int BusinessMessagesFailed;
 	public int UserMessagesSubmitted;
@@ -242,7 +244,7 @@ public class GA_Settings : ScriptableObject
 		string device = SystemInfo.deviceModel;
 		int i = device.Length - 1;
 		int io = 0;
-		while (int.TryParse(device[i].ToString(), out io) || device[i].Equals(',') || device[i].Equals('.'))
+		while (i >= 0 && (int.TryParse(device[i].ToString(), out io) || device[i].Equals(',') || device[i].Equals('.')))
 		{
 			i--;
 		}

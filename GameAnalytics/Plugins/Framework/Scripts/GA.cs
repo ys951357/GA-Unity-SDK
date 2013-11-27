@@ -41,6 +41,7 @@ public class GA {
 	public class GA_API
 	{
 		public GA_Quality Quality = new GA_Quality();
+		public GA_Error Error = new GA_Error();
 		public GA_Design Design = new GA_Design();
 		public GA_Business Business = new GA_Business();
 		public GA_GenericInfo GenericInfo = new GA_GenericInfo();
