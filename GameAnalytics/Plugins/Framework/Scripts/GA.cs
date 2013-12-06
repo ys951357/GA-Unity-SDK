@@ -161,7 +161,7 @@ public class GA {
 #endif
 		}
 		else
-		{	
+		{
 			GA_controller.RunCoroutine(routine);
 		}
 	}
@@ -183,6 +183,7 @@ public class GA {
 	}
 	
 	#if UNITY_EDITOR
+	
 	public static void HierarchyWindowCallback (int instanceID, Rect selectionRect)
 	{
 		GameObject go = (GameObject)EditorUtility.InstanceIDToObject(instanceID);
