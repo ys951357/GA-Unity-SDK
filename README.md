@@ -4,10 +4,9 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
-##### v.0.5.5:
+##### v.0.5.6:
 
 - The SDK will now indicate when a new version is available for download.
-- Added a GA_Settings option to use the bundle version instead of the Build field (only iOS, Android, Blackberry).
 - Improved support for Heatmaps in the Unity editor with the new Unity 2D sprites.
 - Setting up the Android ID plugin is now required when building for Android (see the readme in the Plugins/Android folder).
 - Fixed an issue in the editor where the GA_SystemTracker would throw an exception after recompiling code in play mode.

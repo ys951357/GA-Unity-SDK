@@ -4,7 +4,6 @@
 /// </summary>
 
 using UnityEngine;
-using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -140,17 +139,8 @@ public class GA_Submit
 				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID]))
 					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID], GA.API.GenericInfo.SessionID);
 
-				#if UNITY_IPHONE || UNITY_ANDROID || UNITY_BLACKBERRY
-				
-				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]))
-					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.SettingsGA.UseBundleVersion?PlayerSettings.bundleVersion:GA.SettingsGA.Build);
-				
-				#else
-				
 				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]))
 					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.SettingsGA.Build);
-				
-				#endif
 				
 				categories[item.Type].Add(item);
 			}
@@ -165,17 +155,8 @@ public class GA_Submit
 				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID]))
 					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.SessionID], GA.API.GenericInfo.SessionID);
 				
-				#if UNITY_IPHONE || UNITY_ANDROID || UNITY_BLACKBERRY
-				
-				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]))
-					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.SettingsGA.UseBundleVersion?PlayerSettings.bundleVersion:GA.SettingsGA.Build);
-				
-				#else
-				
 				if (!item.Parameters.ContainsKey(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build]))
 					item.Parameters.Add(GA_ServerFieldTypes.Fields[GA_ServerFieldTypes.FieldType.Build], GA.SettingsGA.Build);
-				
-				#endif
 				
 				categories.Add(item.Type, new List<Item> { item });
 			}
@@ -300,7 +281,7 @@ public class GA_Submit
 			//Set the authorization header to contain an MD5 hash of the JSON array string + the private key
 			Hashtable headers = new Hashtable();
 			headers.Add("Authorization", CreateMD5Hash(json + priKey));
-			headers.Add("Content-Length", data.Length);
+			//headers.Add("Content-Length", data.Length);
 			
 			//Try to send the data
 			www = new WWW(url, data, headers);

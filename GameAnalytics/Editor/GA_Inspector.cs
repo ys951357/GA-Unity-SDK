@@ -21,7 +21,7 @@ public class GA_Inspector : Editor
 	private GUIContent _apiKeyLabel				= new GUIContent("API Key", "Your GameAnalytics API Key - copy/paste from the GA website. This key is used for retrieving data from the GA servers, f.x. when you want to generate heatmaps.");
 	private GUIContent _heatmapSizeLabel		= new GUIContent("Heatmap Grid Size", "The size in Unity units of each heatmap grid space. Data visualized as a heatmap must use the same grid size as was used when the data was collected, otherwise the visualization will be wrong.");
 	private GUIContent _build					= new GUIContent("Build", "The current version of the game. Updating the build name for each test version of the game will allow you to filter by build when viewing your data on the GA website.");
-	private GUIContent _useBundleVersion		= new GUIContent("Use Bundle Version", "Uses the Bundle Version from Player Settings instead of the Build field above (only works for iOS, Android, and Blackberry).");
+	//private GUIContent _useBundleVersion		= new GUIContent("Use Bundle Version", "Uses the Bundle Version from Player Settings instead of the Build field above (only works for iOS, Android, and Blackberry).");
 	private GUIContent _debugMode				= new GUIContent("Debug Mode", "Show additional debug messages from GA in the unity editor console.");
 	private GUIContent _sendExampleToMyGame		= new GUIContent("Get Example Game Data", "If enabled data collected while playing the example tutorial game will be sent to your game (using your game key and secret key). Otherwise data will be sent to a premade GA test game, to prevent it from polluting your data.");
 	private GUIContent _runInEditor				= new GUIContent("Run In Editor Play Mode", "Submit data to the GameAnalytics server while playing your game in the Unity editor.");
@@ -108,6 +108,11 @@ public class GA_Inspector : Editor
 			ga.Logo = new Texture2D(1,1);
 			ga.Logo.LoadImage(System.Convert.FromBase64String(d));*/
 		}
+		
+		/*if (ga.UseBundleVersion)
+		{
+			ga.Build = PlayerSettings.bundleVersion;
+		}*/
 	}
 	
 	override public void OnInspectorGUI ()
@@ -248,11 +253,11 @@ public class GA_Inspector : Editor
 			ga.Build = EditorGUILayout.TextField("", ga.Build);
 			GUILayout.EndHorizontal();
 			
-			GUILayout.BeginHorizontal();
+			/*GUILayout.BeginHorizontal();
 		    GUILayout.Label("", GUILayout.Width(7));
 		    GUILayout.Label(_useBundleVersion, GUILayout.Width(150));
 			ga.UseBundleVersion = EditorGUILayout.Toggle("", ga.UseBundleVersion);
-			GUILayout.EndHorizontal();
+			GUILayout.EndHorizontal();*/
 		}
 		
 		if(ga.CurrentInspectorState == GA_Settings.InspectorStates.Debugging)
