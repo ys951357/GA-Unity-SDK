@@ -4,6 +4,12 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.5.7:
+
+- Added support for the Facebook SDK plugin (please see GA documentation for setup information).
+- Improved automatic tracking for Web Player builds.
+- Fixed a few minor issues (automatic device information tracking, etc.).
+
 ##### v.0.5.6:
 
 - The SDK will now indicate when a new version is available for download.

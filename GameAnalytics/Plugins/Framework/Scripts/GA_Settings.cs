@@ -22,7 +22,7 @@ public class GA_Settings : ScriptableObject
 	#endif
 	
 	#if UNITY_ANDROID && !UNITY_EDITOR && ANDROID_ID
-	private const string ANDROID_CLASS_NAME = "com.yourcompany.yourgame";
+	private const string ANDROID_CLASS_NAME = "com.GameAnalytics.GA";
 	#endif
 	
 	/// <summary>
@@ -47,7 +47,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.5.6";
+	public static string VERSION = "0.5.7";
 	
 	#endregion
 	
@@ -232,8 +232,13 @@ public class GA_Settings : ScriptableObject
 				
 				#if UNITY_EDITOR
 				
-				GameObject gaTracking = new GameObject("GA Trackeing");
+				GameObject gaTracking = new GameObject("GA_Tracking");
 				gaTracking.AddComponent<GA_Tracking>();
+				
+				#else
+				
+				GameObject fbGameObject = new GameObject("GA_FacebookSDK");
+				fbGameObject.AddComponent<GA_FacebookSDK>();
 				
 				#endif
 			}
@@ -247,6 +252,14 @@ public class GA_Settings : ScriptableObject
 	private bool AddUniqueIDs()
 	{
 		bool returnValue = false;
+		
+		#if !UNITY_EDITOR && UNITY_WEBPLAYER
+		
+		Application.ExternalEval(
+			"var __scr = document.createElement('script'); __scr.setAttribute('async', 'true'); __scr.type = 'text/javascript'; __scr.src = 'https://tracking.gameanalytics.com/adroll.js'; ((document.getElementsByTagName('head') || [null])[0] || document.getElementsByTagName('script')[0].parentNode).appendChild(__scr);"
+		);
+		
+		#endif
 		
 		#if !UNITY_EDITOR && UNITY_STANDALONE_WIN
 		

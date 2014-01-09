@@ -292,7 +292,7 @@ public class GA_Submit
 			
 			Dictionary<string, string> headers = new Dictionary<string, string>();
 			headers.Add("Authorization", CreateMD5Hash(json + priKey));
-			headers.Add("Content-Length", data.Length.ToString());
+			//headers.Add("Content-Length", data.Length.ToString());
 			
 			//Try to send the data
 			www = new WWW(url, data, headers);
