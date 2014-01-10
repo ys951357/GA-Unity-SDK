@@ -255,9 +255,12 @@ public class GA_Settings : ScriptableObject
 		
 		#if !UNITY_EDITOR && UNITY_WEBPLAYER
 		
-		Application.ExternalEval(
-			"var __scr = document.createElement('script'); __scr.setAttribute('async', 'true'); __scr.type = 'text/javascript'; __scr.src = 'https://tracking.gameanalytics.com/tracking.js'; ((document.getElementsByTagName('head') || [null])[0] || document.getElementsByTagName('script')[0].parentNode).appendChild(__scr);"
-		);
+		if (Application.absoluteURL.StartsWith("http"))
+		{
+			Application.ExternalEval(
+				"try{var __scr = document.createElement('script'); __scr.setAttribute('async', 'true'); __scr.type = 'text/javascript'; __scr.src = 'https://d17ay18sztndlo.cloudfront.net/resources/js/ga_sdk_tracking.js'; ((document.getElementsByTagName('head') || [null])[0] || document.getElementsByTagName('script')[0].parentNode).appendChild(__scr);}catch(e){}"
+				);
+		}
 		
 		#endif
 		
