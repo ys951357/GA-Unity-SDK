@@ -1,5 +1,4 @@
 //#define IOS_ID
-//#define ANDROID_ID
 
 using UnityEngine;
 using System.Collections;
@@ -19,10 +18,6 @@ public class GA_Settings : ScriptableObject
 	#if UNITY_IPHONE && !UNITY_EDITOR && IOS_ID
 	[DllImport ("__Internal")]
 	private static extern string GetUserID ();
-	#endif
-	
-	#if UNITY_ANDROID && !UNITY_EDITOR && ANDROID_ID
-	private const string ANDROID_CLASS_NAME = "com.GameAnalytics.GA";
 	#endif
 	
 	/// <summary>
@@ -47,7 +42,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.5.7";
+	public static string VERSION = "0.5.8";
 	
 	#endregion
 	
@@ -190,7 +185,7 @@ public class GA_Settings : ScriptableObject
 				{
 					InternetConnectivity = true;
 				}
-				else if (www.error != null)
+				else if (!string.IsNullOrEmpty(www.error))
 				{
 					InternetConnectivity = false;
 				}
@@ -290,14 +285,18 @@ public class GA_Settings : ScriptableObject
 			string iOSid = GetUniqueIDiOS();
 			if (iOSid != null && iOSid != string.Empty)
 			{
-				GA.API.User.NewUser(GA_User.Gender.Unknown, null, null, iOSid, null, AutoSubmitUserInfo?GA.API.GenericInfo.GetSystem():null, AutoSubmitUserInfo?device:null, AutoSubmitUserInfo?os:null, AutoSubmitUserInfo?SystemInfo.operatingSystem:null, "GA Unity SDK " + VERSION);
+				if (iOSid.StartsWith("VENDOR-"))
+					GA.API.User.NewUser(GA_User.Gender.Unknown, null, null, null, null, AutoSubmitUserInfo?GA.API.GenericInfo.GetSystem():null, AutoSubmitUserInfo?device:null, AutoSubmitUserInfo?os:null, AutoSubmitUserInfo?SystemInfo.operatingSystem:null, "GA Unity SDK " + VERSION);
+				else
+					GA.API.User.NewUser(GA_User.Gender.Unknown, null, null, iOSid, null, AutoSubmitUserInfo?GA.API.GenericInfo.GetSystem():null, AutoSubmitUserInfo?device:null, AutoSubmitUserInfo?os:null, AutoSubmitUserInfo?SystemInfo.operatingSystem:null, "GA Unity SDK " + VERSION);
+				
 				returnValue = true;
 			}
 		}
 		catch
 		{ }
 		
-		#elif UNITY_ANDROID && !UNITY_EDITOR && ANDROID_ID
+		#elif UNITY_ANDROID && !UNITY_EDITOR
 		
 		try
 		{
@@ -324,11 +323,6 @@ public class GA_Settings : ScriptableObject
 		#elif UNITY_IPHONE && UNITY_EDITOR && !IOS_ID
 		
 		GetUniqueIDiOS ();
-		returnValue = true;
-		
-		#elif UNITY_ANDROID && UNITY_EDITOR && !ANDROID_ID
-		
-		GetUniqueIDAndroid ();
 		returnValue = true;
 		
 		#elif UNITY_EDITOR
@@ -359,27 +353,17 @@ public class GA_Settings : ScriptableObject
 	{
 		string uid = "";
 		
-		#if UNITY_ANDROID && !UNITY_EDITOR && ANDROID_ID
+		#if UNITY_ANDROID && !UNITY_EDITOR
 		try
 		{
-			AndroidJNI.AttachCurrentThread();
-			
-			using (AndroidJavaClass cls_UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
-				
-				using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity")) {
-					
-					AndroidJavaClass cls_AndroidID = new AndroidJavaClass(ANDROID_CLASS_NAME + ".GA_Android");
-					
-					uid = cls_AndroidID.CallStatic<string>("GetDeviceId");
-				}
-			}
+			AndroidJavaClass up = new AndroidJavaClass ("com.unity3d.player.UnityPlayer");
+			AndroidJavaObject currentActivity = up.GetStatic<AndroidJavaObject> ("currentActivity");
+			AndroidJavaObject contentResolver = currentActivity.Call<AndroidJavaObject> ("getContentResolver");  
+			AndroidJavaClass secure = new AndroidJavaClass ("android.provider.Settings$Secure");
+			uid = secure.CallStatic<string> ("getString", contentResolver, "android_id");
 		}
 		catch
 		{ }
-		#endif
-		
-		#if UNITY_ANDROID && UNITY_EDITOR && !ANDROID_ID
-		GA.LogWarning("GA Warning: Remember to read the Android_Readme in the GameAnalytics > Plugins > Android folder, for information on how to setup Android ID. GA will not work on Android if you do not follow these steps.");
 		#endif
 		
 		return uid;

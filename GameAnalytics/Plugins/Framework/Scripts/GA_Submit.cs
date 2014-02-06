@@ -316,7 +316,7 @@ public class GA_Submit
 			
 			try
 			{
-				if (www.error != null && !CheckServerReply(www))
+				if (!string.IsNullOrEmpty(www.error) && !CheckServerReply(www))
 				{
 					throw new Exception(www.error);
 				}
@@ -554,7 +554,7 @@ public class GA_Submit
 	{
 		try
 		{
-			if (www.error != null)
+			if (!string.IsNullOrEmpty(www.error))
 			{
 				string errStart = www.error.Substring(0, 3);
 				if (errStart.Equals("201") || errStart.Equals("202") || errStart.Equals("203") || errStart.Equals("204") || errStart.Equals("205") || errStart.Equals("206"))

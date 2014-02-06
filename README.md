@@ -4,6 +4,12 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.5.8:
+
+- Apple has started rejecting some apps using IDFA (identifier for advertisers) which do not show ads. We have added a temporary fix to this problem. For more information please see the iOS_Readme.txt file in the GameAnalytics > Plugins > iOS folder.
+- Greatly improved the Android setup process (GameAnalytics now works out-of-the-box with Android, requiring no additional setup).
+- Minor bug fixes and improvements.
+
 ##### v.0.5.7:
 
 - Added support for the Facebook SDK plugin (see GA documentation for setup information).

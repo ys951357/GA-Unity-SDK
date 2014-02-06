@@ -31,7 +31,7 @@ public class GA_GameObjectManager : MonoBehaviour {
 	{
 		if (!paused && GA.SettingsGA.NewSessionOnResume)
 		{
-			Debug.Log("new session id");
+			GA.Log("GA: Generating new session id");
 			GA.API.GenericInfo.SetSessionUUID();
 		}
 	}

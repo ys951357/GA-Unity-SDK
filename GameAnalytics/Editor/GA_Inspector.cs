@@ -394,13 +394,13 @@ public class GA_Inspector : Editor
 	
 	public static void CheckForUpdates ()
 	{
-		WWW www = new WWW("https://s3.amazonaws.com/download.gameanalytics.com/sdk_status/current.json");
+		WWW www = new WWW("https://s3.amazonaws.com/public.gameanalytics.com/sdk_status/current.json");
 		GA_ContinuationManager.StartCoroutine(CheckWebUpdate(www), () => www.isDone);
 	}
 	
 	private static void GetUpdateChanges ()
 	{
-		WWW www = new WWW("https://s3.amazonaws.com/download.gameanalytics.com/sdk_status/latest_changes/unity.txt");
+		WWW www = new WWW("https://s3.amazonaws.com/public.gameanalytics.com/sdk_status/change_logs.json");
 		GA_ContinuationManager.StartCoroutine(CheckWebChanges(www), () => www.isDone);
 	}
 	
@@ -410,7 +410,7 @@ public class GA_Inspector : Editor
 		
 		try {
 			Hashtable returnParam = (Hashtable)GA_MiniJSON.JsonDecode(www.text);
-			string newVersion = ((Hashtable)returnParam["unitysdk"])["version"].ToString();
+			string newVersion = ((Hashtable)returnParam["unity"])["version"].ToString();
 			
 			GA_UpdateWindow.SetNewVersion(newVersion);
 			if (newVersion != GA_Settings.VERSION)
@@ -426,13 +426,33 @@ public class GA_Inspector : Editor
 		yield return www;
 		
 		try {
-			GA_UpdateWindow.SetChanges(www.text);
+			Hashtable returnParam = (Hashtable)GA_MiniJSON.JsonDecode(www.text);
 			
-			string skippedVersion = EditorPrefs.GetString("ga_skip_version", "");
-			
-			if (!skippedVersion.Equals(GA_UpdateWindow.GetNewVersion()))
+			ArrayList unity = ((ArrayList)returnParam["unity"]);
+			for (int i = 0; i < unity.Count; i++)
 			{
-				OpenUpdateWindow();
+				Hashtable unityHash = (Hashtable)unity[i];
+				if (unityHash["version"].ToString() == GA_UpdateWindow.GetNewVersion())
+				{
+					i = unity.Count;
+					ArrayList changes = ((ArrayList)unityHash["changes"]);
+					string newChanges = "";
+					for (int u = 0; u < changes.Count; u++)
+					{
+						if (string.IsNullOrEmpty(newChanges))
+							newChanges = "- " + changes[u].ToString();
+						else
+							newChanges += "\n- " + changes[u].ToString();
+					}
+					
+					GA_UpdateWindow.SetChanges(newChanges);
+					string skippedVersion = EditorPrefs.GetString("ga_skip_version", "");
+					
+					if (!skippedVersion.Equals(GA_UpdateWindow.GetNewVersion()))
+					{
+						OpenUpdateWindow();
+					}
+				}
 			}
 		}
 		catch {}
