@@ -42,7 +42,7 @@ public class GA_Settings : ScriptableObject
 	/// The version of the GA Unity Wrapper plugin
 	/// </summary>
 	[HideInInspector]
-	public static string VERSION = "0.5.8";
+	public static string VERSION = "0.5.9";
 	
 	#endregion
 	
@@ -76,6 +76,7 @@ public class GA_Settings : ScriptableObject
 	[SerializeField]
 	public string Build = "0.1";
 	public bool DebugMode = true;
+	public bool DebugAddEvent = false;
 	public bool SendExampleGameDataToMyGame = false;
 	public bool RunInEditorPlayMode = true;
 	public bool UseBundleVersion = false;
@@ -214,7 +215,7 @@ public class GA_Settings : ScriptableObject
 		if (startQueue)
 		{
 			if (InternetConnectivity)
-				GA.Log("GA initialized, waiting for events..");
+				GA.Log("GA has confirmed internet connection..");
 			else
 				GA.Log("GA detects no internet connection..");
 			

@@ -153,6 +153,35 @@ public class GA_User
 		}
 
 		GA_Queue.AddItem(parameters, GA_Submit.CategoryType.GA_User, false);
+		
+		#if UNITY_EDITOR
+		
+		if (GA.SettingsGA.DebugAddEvent)
+		{
+			string options = "";
+			if (gender == Gender.Male)
+			{
+				options = ", Gender: Male";
+			}
+			else if (gender == Gender.Female)
+			{
+				options = ", Gender: Female";
+			}
+			
+			if (birth_year.HasValue && birth_year.Value != 0)
+			{
+				options += ", Birth Year: " + birth_year;
+			}
+			
+			if (friend_count.HasValue)
+			{
+				options += ", Friend Count: " + friend_count;
+			}
+			
+			GA.Log("GA User Event added" + options, true);
+		}
+		
+		#endif
 	}
 	
 	#endregion

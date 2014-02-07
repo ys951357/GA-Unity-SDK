@@ -22,7 +22,8 @@ public class GA_Inspector : Editor
 	private GUIContent _heatmapSizeLabel		= new GUIContent("Heatmap Grid Size", "The size in Unity units of each heatmap grid space. Data visualized as a heatmap must use the same grid size as was used when the data was collected, otherwise the visualization will be wrong.");
 	private GUIContent _build					= new GUIContent("Build", "The current version of the game. Updating the build name for each test version of the game will allow you to filter by build when viewing your data on the GA website.");
 	//private GUIContent _useBundleVersion		= new GUIContent("Use Bundle Version", "Uses the Bundle Version from Player Settings instead of the Build field above (only works for iOS, Android, and Blackberry).");
-	private GUIContent _debugMode				= new GUIContent("Debug Mode", "Show additional debug messages from GA in the unity editor console.");
+	private GUIContent _debugMode				= new GUIContent("Debug Mode", "Show additional debug messages from GA in the unity editor console when submitting data.");
+	private GUIContent _debugAddEvent			= new GUIContent("Debug Add Event", "Shows additional debug information every time an event is added to the queue.");
 	private GUIContent _sendExampleToMyGame		= new GUIContent("Get Example Game Data", "If enabled data collected while playing the example tutorial game will be sent to your game (using your game key and secret key). Otherwise data will be sent to a premade GA test game, to prevent it from polluting your data.");
 	private GUIContent _runInEditor				= new GUIContent("Run In Editor Play Mode", "Submit data to the GameAnalytics server while playing your game in the Unity editor.");
 	private GUIContent _customUserID			= new GUIContent("Custom User ID", "If enabled no data will be submitted until a custom user ID is provided. This is useful if you have your own log-in system, which ensures you have a unique user ID.");
@@ -268,6 +269,12 @@ public class GA_Inspector : Editor
 		    GUILayout.Label("", GUILayout.Width(7));
 		    GUILayout.Label(_debugMode, GUILayout.Width(150));
 			ga.DebugMode = EditorGUILayout.Toggle("", ga.DebugMode);
+			GUILayout.EndHorizontal();
+			
+			GUILayout.BeginHorizontal();
+		    GUILayout.Label("", GUILayout.Width(7));
+		    GUILayout.Label(_debugAddEvent, GUILayout.Width(150));
+			ga.DebugAddEvent = EditorGUILayout.Toggle("", ga.DebugAddEvent);
 			GUILayout.EndHorizontal();
 			
 			GUILayout.BeginHorizontal();

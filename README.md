@@ -4,6 +4,11 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.5.9:
+
+- Added a new debug option, Debug Add Event, which will log a debug message every time an event is added. This option is disabled by default, but can be enabled from the Debug tab in GA_Settings.
+- Fixed a missing link in the iOS_Readme file.
+
 ##### v.0.5.8:
 
 - Apple has started rejecting some apps using IDFA (identifier for advertisers) which do not show ads. We have added a temporary fix to this problem. For more information please see the iOS_Readme.txt file in the GameAnalytics > Plugins > iOS folder.

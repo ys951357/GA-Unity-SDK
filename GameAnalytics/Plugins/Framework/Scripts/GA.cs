@@ -166,9 +166,15 @@ public class GA {
 		}
 	}
 	
+	public static void Log(object msg, bool addEvent)
+	{
+		if (GA.SettingsGA.DebugMode || (addEvent && GA.SettingsGA.DebugAddEvent))
+			Debug.Log(msg);
+	}
+	
 	public static void Log(object msg)
 	{
-		if(GA.SettingsGA.DebugMode)
+		if (GA.SettingsGA.DebugMode)
 			Debug.Log(msg);
 	}
 	
