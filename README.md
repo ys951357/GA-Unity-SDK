@@ -4,6 +4,13 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.6.0:
+
+- New Ad Support feature for mobile games (see the Ad Support tab under GA_Settings). Supports iAd and Chartboost ad networks.
+- Fixed some issues with building for Unity Metro (in the newest version of Unity).
+- You can now call GA.SettingsGA.SetKeys(gamekey, secretkey) to change your keys dynamically.
+- Minor bug fixes and improvements.
+
 ##### v.0.5.9:
 
 - Added a new debug option, Debug Add Event, which will log a debug message every time an event is added. This option is disabled by default, but can be enabled from the Debug tab in GA_Settings.
