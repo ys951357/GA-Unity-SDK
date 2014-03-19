@@ -4,6 +4,13 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.6.1:
+
+- Fixed an error when checking for updates while the update server is down.
+- Fixed a build error caused by AdBannerView on non-iOS platforms.
+- You will now be warned about missing Game key or API key when updating heatmaps.
+- Some minor updates to the way new versions are handled.
+
 ##### v.0.6.0:
 
 - New Ad Support feature for mobile games (see the Ad Support tab under GA_Settings). Supports iAd and Chartboost ad networks.
