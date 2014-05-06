@@ -4,6 +4,17 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.6.2:
+
+- Greatly improved support for PlayMaker (see support.gameanalytics.com for more info).
+- New sign up and login system in the SDK.
+- Automatically sets your Game Key and Secret Key when you login.
+- Added GA_Queue.RestartSubmit(), which can be called to start sending data again after GA_Queue.EndSubmit() was called.
+- Added a Delay Quit option under GA_Settings > Advanced, which determines whether the SDK should pause Application.Quit actions to send remaining data (only PC/MAC).
+- Removed Quality events (Error events should now be used instead of Quality).
+- Added GA.API.GenericInfo.SetSessionUUID(string newSessionID), which dynamically sets a new session ID.
+- Minor bug fixes.
+
 ##### v.0.6.1:
 
 - Fixed an error when checking for updates while the update server is down.
