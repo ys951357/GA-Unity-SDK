@@ -4,6 +4,12 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.6.3:
+
+- Added support for the Android Advertising ID. Please see the Android readme file under GameAnalytics > Plugins > Android.
+- Updated Ad support for Chartboost to reflect their newest SDK version.
+- Various bug fixes.
+
 ##### v.0.6.2:
 
 - Greatly improved support for PlayMaker (see support.gameanalytics.com for more info).
