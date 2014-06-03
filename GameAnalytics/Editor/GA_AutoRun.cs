@@ -1,15 +1,12 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-[InitializeOnLoad]
-public class GA_Autorun
+public class GA_Autorun : AssetPostprocessor
 {
-	#if UNITY_EDITOR
-	static GA_Autorun()
+	static void OnPostprocessAllAssets ( string[] importedAssets,string[] deletedAssets,string[] movedAssets,string[] movedFromAssetPaths)
 	{
 		GA_Inspector.CheckForUpdates();
 		
 		GA_Tracking.Setup();
 	}
-	#endif
 }
