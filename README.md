@@ -4,6 +4,12 @@ NOTE: To use this GIT repository in your Unity game please add the contents dire
 
 ### Recent Changes:
 
+##### v.0.6.4:
+
+- Fixed unknown SDK version (displayed on web).
+- Improved security.
+- Fixed a bunch of minor bugs.
+
 ##### v.0.6.3:
 
 - Added support for the Android Advertising ID. Please see the Android readme file under GameAnalytics > Plugins > Android.
