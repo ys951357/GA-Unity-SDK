@@ -147,20 +147,18 @@ public  class GA_GenericInfo
 				return uid;
 		}
 		
-		#endif
-
-		#if UNITY_ANDROID && !UNITY_EDITOR
+		#elif UNITY_ANDROID && !UNITY_EDITOR
 		
 		string uid = GA.SettingsGA.GetAdvertisingIDAndroid();
 
 		if (!string.IsNullOrEmpty(uid))
 		{
 			return uid;
+		}else{
+			return GetSessionUUID();
 		}
 		
-		#endif
-
-		#if UNITY_WEBPLAYER || UNITY_NACL || UNITY_WP8 || UNITY_METRO || UNITY_PS3
+		#elif UNITY_WEBPLAYER || UNITY_NACL || UNITY_WP8 || UNITY_METRO || UNITY_PS3
 		
 		return SystemInfo.deviceUniqueIdentifier;
 		
@@ -193,6 +191,7 @@ public  class GA_GenericInfo
 		return GetSessionUUID();
 		
 		#endif
+
 	}
 	
 	/// <summary>
